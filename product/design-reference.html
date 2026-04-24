@@ -1,0 +1,2041 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FoodOps · 餐饮一站式管理系统</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ==================== CSS VARIABLES ==================== */
+:root {
+  --sidebar-bg: #0F172A;
+  --sidebar-hover: #1E293B;
+  --sidebar-active: #2563EB;
+  --main-bg: #F8FAFC;
+  --card-bg: #FFFFFF;
+  --primary: #2563EB;
+  --primary-light: #DBEAFE;
+  --accent: #10B981;
+  --accent-light: #D1FAE5;
+  --danger: #F43F5E;
+  --danger-light: #FFE4E6;
+  --amber: #F59E0B;
+  --amber-light: #FEF3C7;
+  --text-primary: #0F172A;
+  --text-secondary: #64748B;
+  --text-muted: #94A3B8;
+  --border: #E2E8F0;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.04);
+  --font-heading: 'Plus Jakarta Sans', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --sidebar-width: 220px;
+}
+
+/* ==================== RESET ==================== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: var(--font-body);
+  font-size: 15px;
+  background: var(--main-bg);
+  color: var(--text-primary);
+  overflow: hidden;
+}
+
+/* ==================== LAYOUT ==================== */
+.app-shell {
+  display: flex;
+  height: 100vh;
+}
+
+/* ==================== SIDEBAR ==================== */
+.sidebar {
+  width: var(--sidebar-width);
+  min-width: var(--sidebar-width);
+  background: var(--sidebar-bg);
+  display: flex;
+  flex-direction: column;
+  color: #CBD5E1;
+  z-index: 10;
+}
+.sidebar-logo {
+  padding: 24px 20px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.sidebar-logo h1 {
+  font-family: var(--font-heading);
+  font-size: 22px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.5px;
+}
+.sidebar-logo h1 span { color: var(--primary); }
+.sidebar-logo p {
+  font-size: 11px;
+  color: #64748B;
+  margin-top: 4px;
+}
+.sidebar-nav {
+  flex: 1;
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  min-height: 42px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.15s;
+  user-select: none;
+  position: relative;
+}
+.nav-item:hover { background: var(--sidebar-hover); color: #fff; }
+.nav-item.active {
+  background: var(--sidebar-active);
+  color: #fff;
+  font-weight: 600;
+}
+.nav-item .icon { font-size: 18px; width: 24px; text-align: center; display: flex; align-items: center; justify-content: center; }
+.nav-item .icon svg { width: 18px; height: 18px; }
+.nav-badge {
+  position: absolute;
+  top: 4px;
+  right: 8px;
+  background: var(--danger);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  line-height: 1;
+}
+.nav-badge:empty { display: none; }
+.sidebar-bottom {
+  padding: 16px 16px 20px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  font-size: 11px;
+  color: #475569;
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* ==================== MAIN ==================== */
+.main-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Header */
+.header {
+  background: var(--card-bg);
+  border-bottom: 1px solid var(--border);
+  padding: 0 28px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.header-left h2 {
+  font-family: var(--font-heading);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.header-left .sep {
+  color: var(--border);
+  font-weight: 300;
+}
+.header-left .subtitle {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+/* Content */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 28px 80px;
+}
+
+/* ==================== PAGE SECTIONS ==================== */
+/* Base page styles handled by transition CSS below */
+
+/* ==================== DASHBOARD ==================== */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.kpi-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow);
+  transition: box-shadow 0.2s;
+}
+.kpi-card:hover { box-shadow: var(--shadow-md); }
+.kpi-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+.kpi-value {
+  font-family: var(--font-heading);
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.kpi-trend {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+}
+.kpi-trend.down { color: var(--danger); }
+.kpi-value .unit {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-left: 2px;
+}
+.kpi-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  margin-bottom: 12px;
+}
+.kpi-icon svg { width: 22px; height: 22px; }
+.kpi-icon.blue { background: var(--primary-light); }
+.kpi-icon.green { background: var(--accent-light); }
+.kpi-icon.red { background: var(--danger-light); }
+.kpi-icon.amber { background: var(--amber-light); }
+
+.dash-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+.dash-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow);
+}
+.dash-card-title {
+  font-family: var(--font-heading);
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: var(--text-primary);
+}
+
+/* CSS bar chart */
+.bar-chart { display: flex; flex-direction: column; gap: 10px; }
+.bar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.bar-label {
+  width: 70px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-align: right;
+  flex-shrink: 0;
+}
+.bar-track {
+  flex: 1;
+  height: 24px;
+  background: #F1F5F9;
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+.bar-fill {
+  height: 100%;
+  border-radius: 6px;
+  width: 0;
+  transition: width 0.4s ease-out;
+  display: flex;
+  align-items: center;
+  padding-left: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  min-width: 32px;
+  position: relative;
+}
+.bar-val-label {
+  position: absolute;
+  right: -36px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.bar-fill.blue { background: var(--primary); }
+.bar-fill.green { background: var(--accent); }
+.bar-fill.amber { background: var(--amber); }
+.bar-fill.red { background: var(--danger); }
+
+/* Time chart */
+.time-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 140px;
+  padding-top: 10px;
+}
+.time-bar-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  justify-content: flex-end;
+}
+.time-bar {
+  width: 100%;
+  max-width: 36px;
+  background: var(--primary);
+  border-radius: 6px 6px 0 0;
+  transition: height 0.4s ease-out;
+  position: relative;
+  cursor: default;
+}
+.time-bar::after {
+  content: attr(data-val);
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+.time-label {
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* Inventory overview mini cards */
+.inv-overview {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.inv-mini {
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  text-align: center;
+}
+.inv-mini.ok { background: var(--accent-light); color: #065F46; }
+.inv-mini.low { background: var(--amber-light); color: #92400E; }
+.inv-mini.out { background: var(--danger-light); color: #9F1239; }
+.inv-mini-val {
+  font-family: var(--font-heading);
+  font-size: 32px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.inv-mini-label {
+  font-size: 13px;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+/* ==================== ORDER MODULE ==================== */
+.order-layout {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 20px;
+  height: calc(100vh - 60px - 48px - 48px - 40px);
+}
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 14px;
+  align-content: start;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.menu-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: var(--shadow);
+  transition: all 0.15s;
+  cursor: default;
+}
+.menu-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+.menu-emoji {
+  width: 100%;
+  height: 64px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  margin-bottom: 10px;
+}
+.menu-name {
+  font-family: var(--font-heading);
+  font-size: 14px;
+  font-weight: 700;
+}
+.menu-price {
+  font-size: 13px;
+  color: var(--primary);
+  font-weight: 600;
+  margin-top: 2px;
+}
+.menu-qty {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+.qty-btn {
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--main-bg);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  transition: all 0.1s;
+  user-select: none;
+}
+.qty-btn:hover { background: var(--primary-light); border-color: var(--primary); color: var(--primary); }
+.qty-val {
+  font-family: var(--font-heading);
+  font-size: 16px;
+  font-weight: 700;
+  width: 24px;
+  text-align: center;
+}
+
+/* Order summary */
+.order-summary {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.order-summary-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-heading);
+  font-size: 15px;
+  font-weight: 700;
+}
+.order-items {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 20px;
+}
+.order-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #F1F5F9;
+  font-size: 13px;
+}
+.order-item:last-child { border-bottom: none; }
+.order-item-name { font-weight: 500; }
+.order-item-detail { color: var(--text-secondary); }
+.order-empty {
+  color: var(--text-muted);
+  text-align: center;
+  padding: 40px 0;
+  font-size: 13px;
+}
+.order-footer {
+  border-top: 1px solid var(--border);
+  padding: 16px 20px;
+}
+.order-total {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-heading);
+  font-size: 18px;
+  font-weight: 800;
+  margin-bottom: 14px;
+}
+.btn-submit {
+  width: 100%;
+  padding: 12px;
+  min-height: 40px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--primary);
+  color: #fff;
+  font-family: var(--font-heading);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-submit:hover { background: #1D4ED8; }
+.btn-submit:disabled { background: #94A3B8; cursor: not-allowed; }
+
+/* ==================== INVENTORY ==================== */
+.alert-banner {
+  background: var(--danger-light);
+  border: 1px solid #FECDD3;
+  border-radius: var(--radius);
+  padding: 14px 20px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #9F1239;
+}
+.alert-banner .icon { font-size: 18px; }
+.inv-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.inv-table th {
+  background: #F1F5F9;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.inv-table td {
+  padding: 12px 16px;
+  font-size: 13px;
+  border-bottom: 1px solid #F1F5F9;
+  vertical-align: middle;
+}
+.inv-table tr:last-child td { border-bottom: none; }
+.inv-table .name { font-weight: 600; }
+.stock-bar-wrap {
+  width: 100%;
+  height: 8px;
+  background: #F1F5F9;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.stock-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1), background 0.3s;
+}
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.badge.ok { background: var(--accent-light); color: #065F46; }
+.badge.low { background: var(--amber-light); color: #92400E; }
+.badge.out { background: var(--danger-light); color: #9F1239; }
+
+/* ==================== SCHEDULE ==================== */
+.schedule-wrap {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.schedule-legend {
+  display: flex;
+  gap: 16px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  flex-wrap: wrap;
+}
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  display: inline-block;
+  margin-right: 5px;
+  vertical-align: middle;
+}
+.sched-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.sched-table th {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 12px 8px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+  background: #F1F5F9;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.sched-table th:first-child { text-align: left; padding-left: 20px; width: 120px; }
+.sched-table td {
+  padding: 6px 4px;
+  text-align: center;
+  border-bottom: 1px solid #F1F5F9;
+  vertical-align: top;
+}
+.sched-table td:first-child {
+  text-align: left;
+  padding-left: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  vertical-align: middle;
+}
+.sched-table td:first-child .role {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+.shift-cell {
+  min-height: 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  align-items: center;
+  justify-content: center;
+}
+.shift-tag {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 5px;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  transition: all 0.1s;
+}
+.shift-tag.morning { background: #DBEAFE; color: #1E40AF; }
+.shift-tag.afternoon { background: #FEF3C7; color: #92400E; }
+.shift-tag.evening { background: #E0E7FF; color: #3730A3; }
+.shift-tag.conflict {
+  background: var(--danger-light);
+  color: var(--danger);
+  box-shadow: 0 0 0 2px var(--danger);
+  animation: pulse-conflict 1.5s infinite;
+}
+@keyframes pulse-conflict {
+  0%, 100% { box-shadow: 0 0 0 2px var(--danger); }
+  50% { box-shadow: 0 0 0 4px rgba(244,63,94,0.3); }
+}
+.shift-empty {
+  width: 100%;
+  min-height: 28px;
+  border: 1.5px dashed var(--border);
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.1s;
+}
+.shift-empty:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+
+/* ==================== TOAST ==================== */
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.toast {
+  background: var(--sidebar-bg);
+  color: #fff;
+  padding: 14px 20px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: toastIn 0.3s ease-out, toastOut 0.3s ease-in 2.7s forwards;
+  max-width: 420px;
+}
+.toast.success { border-left: 4px solid var(--accent); }
+.toast.warning { border-left: 4px solid var(--amber); }
+.toast.error { border-left: 4px solid var(--danger); }
+.toast.info { border-left: 4px solid var(--primary); }
+@keyframes toastIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes toastOut { from { opacity: 1; } to { opacity: 0; transform: translateY(-10px); } }
+
+/* ==================== SCROLLBAR ==================== */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+/* highlight flash */
+@keyframes flashGreen {
+  0% { background: var(--accent-light); }
+  100% { background: transparent; }
+}
+.flash-green { animation: flashGreen 1s ease-out; }
+
+/* ==================== SYNC PULSE (Requirement #2) ==================== */
+@keyframes syncPulse {
+  0% { box-shadow: 0 0 0 0 rgba(37,99,235,0.4); }
+  40% { box-shadow: 0 0 0 6px rgba(37,99,235,0.15); }
+  100% { box-shadow: 0 0 0 0 rgba(37,99,235,0); }
+}
+.sync-pulse {
+  animation: syncPulse 0.8s ease-out;
+  border-color: var(--primary) !important;
+  border: 1px solid var(--primary);
+}
+
+/* ==================== ROW UPDATED (Requirement #5) ==================== */
+@keyframes rowFlash {
+  0% { background: rgba(16,185,129,0.15); }
+  100% { background: transparent; }
+}
+.row-updated td { animation: rowFlash 1.5s ease-out; }
+
+/* ==================== QTY BADGE SCALE (Requirement #8) ==================== */
+@keyframes qtyPop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+.qty-pop { animation: qtyPop 0.2s ease-out; }
+
+/* ==================== ORDER SUMMARY HIGHLIGHT (Requirement #8) ==================== */
+@keyframes summaryHighlight {
+  0% { background: var(--primary-light); }
+  100% { background: transparent; }
+}
+.summary-highlight { animation: summaryHighlight 0.5s ease-out; }
+
+/* ==================== TOAST COLORED (Requirement #2) ==================== */
+.toast.blue { border-left: 4px solid var(--primary); background: #1E293B; }
+.toast.amber { border-left: 4px solid var(--amber); background: #1E293B; }
+.toast.green { border-left: 4px solid var(--accent); background: #1E293B; }
+
+/* ==================== TABULAR NUMS ==================== */
+.qty-val, .order-total, .order-item-detail, .inv-table td, .kpi-value {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ==================== MOBILE READABILITY (Requirement #10) ==================== */
+@media (max-width: 768px) {
+  :root { --sidebar-width: 200px; }
+  .sidebar { min-width: 200px; width: 200px; }
+  .inv-table { display: block; overflow-x: auto; white-space: nowrap; }
+  .sched-table { display: block; overflow-x: auto; white-space: nowrap; }
+  body, .nav-item, .order-item, .inv-table td, .sched-table td { font-size: max(13px, 1em); }
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .dash-grid { grid-template-columns: 1fr; }
+  .order-layout { grid-template-columns: 1fr; }
+}
+
+/* ==================== MODAL RADIUS STANDARDIZE ==================== */
+.toast { border-radius: 12px; }
+.badge { border-radius: 20px; }
+
+/* Chart.js canvas containers */
+.chart-canvas-wrap { position: relative; width: 100%; height: 220px; }
+
+/* ==================== PAGE TRANSITION ANIMATION ==================== */
+.page { opacity: 0; transform: translateY(8px); transition: opacity 0.25s ease, transform 0.25s ease; display: none; }
+.page.active { display: block; opacity: 1; transform: translateY(0); }
+.page.fade-out { opacity: 0; transform: translateY(8px); }
+
+/* ==================== SKELETON LOADING ==================== */
+.skeleton { background: linear-gradient(90deg, #E2E8F0 25%, #F1F5F9 50%, #E2E8F0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; }
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+.skeleton-kpi { height: 110px; }
+.skeleton-card { height: 260px; }
+
+/* ==================== GLOBAL SEARCH ==================== */
+.search-bar { position: relative; }
+.search-input { background: rgba(255,255,255,0.08); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px 8px 36px; color: var(--text-primary); width: 240px; font-family: var(--font-body); font-size: 13px; outline: none; transition: border-color 0.15s, box-shadow 0.15s; }
+.search-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+.search-input::placeholder { color: var(--text-muted); }
+.search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; }
+.search-results { position: absolute; top: calc(100% + 6px); left: 0; width: 320px; background: var(--card-bg); border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.15); max-height: 400px; overflow-y: auto; z-index: 1000; border: 1px solid var(--border); display: none; }
+.search-results.open { display: block; }
+.search-group-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; padding: 10px 16px 4px; }
+.search-result-item { padding: 10px 16px; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: background 0.1s; }
+.search-result-item:hover { background: var(--primary-light); }
+.search-result-item .sr-icon { font-size: 18px; width: 28px; text-align: center; flex-shrink: 0; }
+.search-result-item .sr-text { font-weight: 500; color: var(--text-primary); }
+.search-result-item .sr-sub { font-size: 11px; color: var(--text-secondary); margin-left: auto; }
+.search-no-results { padding: 20px 16px; text-align: center; color: var(--text-muted); font-size: 13px; }
+
+/* ==================== NOTIFICATION CENTER ==================== */
+.notif-bell { position: relative; cursor: pointer; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 8px; transition: background 0.15s; }
+.notif-bell:hover { background: var(--primary-light); }
+.notif-badge { position: absolute; top: 2px; right: 2px; background: #F43F5E; color: white; font-size: 10px; font-weight: 700; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; line-height: 1; }
+.notif-badge:empty { display: none; }
+.notif-dropdown { position: absolute; top: calc(100% + 8px); right: 0; width: 340px; background: var(--card-bg); border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.15); border: 1px solid var(--border); z-index: 1000; display: none; max-height: 420px; overflow-y: auto; }
+.notif-dropdown.open { display: block; }
+.notif-header { padding: 14px 16px; border-bottom: 1px solid var(--border); font-family: var(--font-heading); font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: space-between; }
+.notif-header .mark-all { font-size: 12px; color: var(--primary); cursor: pointer; font-weight: 600; }
+.notif-header .mark-all:hover { text-decoration: underline; }
+.notif-item { padding: 12px 16px; display: flex; align-items: flex-start; gap: 10px; border-bottom: 1px solid #F1F5F9; cursor: pointer; transition: background 0.1s; }
+.notif-item:hover { background: #F8FAFC; }
+.notif-item.unread { background: #EFF6FF; }
+.notif-item .ni-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+.notif-item .ni-icon.warn { background: var(--amber-light); }
+.notif-item .ni-icon.danger { background: var(--danger-light); }
+.notif-item .ni-icon.info { background: var(--primary-light); }
+.notif-item .ni-body { flex: 1; }
+.notif-item .ni-msg { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+.notif-item .ni-time { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.notif-empty { padding: 30px 16px; text-align: center; color: var(--text-muted); font-size: 13px; }
+
+/* ==================== DARK MODE ==================== */
+.dark-toggle { width: 36px; height: 36px; border-radius: 8px; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s; color: var(--text-secondary); }
+.dark-toggle:hover { background: var(--primary-light); }
+.header-actions { display: flex; align-items: center; gap: 8px; }
+
+body.dark-mode { --main-bg: #0F172A; --card-bg: #1E293B; --text-primary: #F1F5F9; --text-secondary: #94A3B8; --text-muted: #64748B; --border: #334155; --shadow: 0 1px 3px rgba(0,0,0,0.3); --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.3); --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.3); }
+body.dark-mode .header { background: #1E293B; border-bottom-color: #334155; }
+body.dark-mode .search-input { background: rgba(255,255,255,0.06); color: #F1F5F9; border-color: #334155; }
+body.dark-mode .search-input:focus { border-color: var(--primary); }
+body.dark-mode .search-results { background: #1E293B; border-color: #334155; }
+body.dark-mode .search-result-item:hover { background: #334155; }
+body.dark-mode .notif-dropdown { background: #1E293B; border-color: #334155; }
+body.dark-mode .notif-item:hover { background: #0F172A; }
+body.dark-mode .notif-item.unread { background: #1E3A5F; }
+body.dark-mode .inv-table th, body.dark-mode .sched-table th { background: #0F172A; color: #94A3B8; border-bottom-color: #334155; }
+body.dark-mode .inv-table td { border-bottom-color: #334155; }
+body.dark-mode .sched-table td { border-bottom-color: #334155; }
+body.dark-mode .bar-track, body.dark-mode .stock-bar-wrap { background: #334155; }
+body.dark-mode .order-item { border-bottom-color: #334155; }
+body.dark-mode .dark-toggle { color: #F1F5F9; }
+body.dark-mode .dark-toggle:hover { background: #334155; }
+body.dark-mode .notif-bell:hover { background: #334155; }
+body.dark-mode .qty-btn { background: #334155; border-color: #475569; color: #F1F5F9; }
+body.dark-mode .qty-btn:hover { background: var(--primary-light); border-color: var(--primary); color: var(--primary); }
+body.dark-mode .alert-banner { background: #3B1929; border-color: #6B2140; color: #FCA5A5; }
+
+/* ==================== RESET DATA BUTTON ==================== */
+.reset-btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; background: transparent; color: #64748B; font-size: 11px; cursor: pointer; transition: all 0.15s; margin-top: 8px; }
+.reset-btn:hover { background: rgba(244,63,94,0.1); border-color: rgba(244,63,94,0.3); color: #F43F5E; }
+
+/* ==================== SORTABLE DRAG ==================== */
+.shift-tag.sortable-ghost { opacity: 0.4; }
+.shift-tag.sortable-chosen { box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+.shift-cell { min-height: 60px; padding: 4px; }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+</head>
+<body>
+
+<div class="app-shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <h1>Food<span>Ops</span></h1>
+      <p>餐饮一站式管理系统</p>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-item active" data-page="dashboard" id="nav-dashboard">
+        <span class="icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg></span> Dashboard
+      </div>
+      <div class="nav-item" data-page="orders" id="nav-orders">
+        <span class="icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="14" r="1"/><circle cx="13" cy="14" r="1"/><path d="M1 1h2l1.5 8h9L15 3H4"/></svg></span> 点餐
+      </div>
+      <div class="nav-item" data-page="inventory" id="nav-inventory">
+        <span class="icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4l6-3 6 3v8l-6 3-6-3V4z"/><path d="M2 4l6 3 6-3"/><path d="M8 7v8"/></svg></span> 库存管理
+        <span class="nav-badge" id="badge-inventory"></span>
+      </div>
+      <div class="nav-item" data-page="schedule" id="nav-schedule">
+        <span class="icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="2" width="14" height="13" rx="2"/><path d="M1 6h14"/><path d="M5 0v3"/><path d="M11 0v3"/></svg></span> 排班管理
+        <span class="nav-badge" id="badge-schedule"></span>
+      </div>
+    </nav>
+    <div class="sidebar-bottom">
+      FoodOps 餐饮管理系统
+      <br><button class="reset-btn" onclick="resetAllData()"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8a6 6 0 0 1 10.3-4.1"/><path d="M14 8a6 6 0 0 1-10.3 4.1"/><path d="M12.3 1v3h-3"/><path d="M3.7 15v-3h3"/></svg> 重置数据</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-area">
+    <!-- HEADER -->
+    <header class="header">
+      <div class="header-left">
+        <h2>好味来</h2>
+        <span class="sep">|</span>
+        <span class="subtitle">餐饮管理系统</span>
+      </div>
+      <div class="header-actions">
+        <!-- Global Search -->
+        <div class="search-bar" id="search-bar">
+          <svg class="search-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="5"/><path d="M16 16l-3.5-3.5"/></svg>
+          <input class="search-input" id="search-input" type="text" placeholder="搜索菜品、库存、员工..." autocomplete="off">
+          <div class="search-results" id="search-results"></div>
+        </div>
+        <!-- Notification Bell -->
+        <div class="notif-bell" id="notif-bell" onclick="toggleNotifications()">
+          <svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1.5a4 4 0 0 1 4 4c0 4 1.5 5 1.5 5H2.5S4 9.5 4 5.5a4 4 0 0 1 4-4z"/><path d="M6.5 13.5a1.5 1.5 0 0 0 3 0"/></svg>
+          <span class="notif-badge" id="notif-badge"></span>
+          <div class="notif-dropdown" id="notif-dropdown"></div>
+        </div>
+        <!-- Dark Mode Toggle -->
+        <button class="dark-toggle" id="dark-toggle" onclick="toggleDarkMode()" title="切换深色模式">
+          <svg id="dark-icon-sun" width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41"/></svg>
+          <svg id="dark-icon-moon" width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M14 8.5A6 6 0 0 1 7.5 2 6 6 0 1 0 14 8.5z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="content">
+      <!-- ==================== DASHBOARD PAGE ==================== -->
+      <div class="page active" id="page-dashboard">
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-icon blue"><svg viewBox="0 0 22 22" fill="none" stroke="#2563EB" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 1v20M6 5h10M4 9h14M6 13h10M8 17h6"/><circle cx="11" cy="11" r="9"/></svg></div>
+            <div class="kpi-label">今日营业额</div>
+            <div class="kpi-value"><span id="kpi-revenue">RM 2,480</span><span class="kpi-trend" id="trend-revenue"></span></div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon green"><svg viewBox="0 0 22 22" fill="none" stroke="#10B981" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h16v16H3z" rx="2"/><path d="M7 10h8"/><path d="M7 14h5"/><path d="M7 6h8"/></svg></div>
+            <div class="kpi-label">今日订单</div>
+            <div class="kpi-value"><span id="kpi-orders">18<span class="unit">单</span></span><span class="kpi-trend" id="trend-orders"></span></div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon red"><svg viewBox="0 0 22 22" fill="none" stroke="#F43F5E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 2L2 20h18L11 2z"/><path d="M11 9v4"/><circle cx="11" cy="16" r="0.5" fill="#F43F5E"/></svg></div>
+            <div class="kpi-label">库存警告</div>
+            <div class="kpi-value"><span id="kpi-warnings">2<span class="unit">项低量</span></span></div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon amber"><svg viewBox="0 0 22 22" fill="none" stroke="#F59E0B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="8" r="4"/><path d="M3 20c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg></div>
+            <div class="kpi-label">当班人数</div>
+            <div class="kpi-value"><span id="kpi-staff">5<span class="unit">人</span></span></div>
+          </div>
+        </div>
+
+        <div class="dash-grid">
+          <!-- Sales ranking -->
+          <div class="dash-card">
+            <div class="dash-card-title"><svg style="width:16px;height:16px;vertical-align:middle;margin-right:6px;" viewBox="0 0 16 16" fill="none" stroke="var(--amber)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14V8h3v6H3zM7 14V4h3v10H7zM11 14V1h3v13h-3z"/></svg>菜品销售排行</div>
+            <div class="chart-canvas-wrap"><canvas id="sales-chart-canvas"></canvas></div>
+          </div>
+
+          <!-- Time analysis -->
+          <div class="dash-card">
+            <div class="dash-card-title"><svg style="width:16px;height:16px;vertical-align:middle;margin-right:6px;" viewBox="0 0 16 16" fill="none" stroke="var(--primary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="7"/><path d="M8 4v4l3 2"/></svg>时段分析</div>
+            <div class="chart-canvas-wrap"><canvas id="time-chart-canvas"></canvas></div>
+          </div>
+
+          <!-- Inventory overview -->
+          <div class="dash-card">
+            <div class="dash-card-title"><svg style="width:16px;height:16px;vertical-align:middle;margin-right:6px;" viewBox="0 0 16 16" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4l6-3 6 3v8l-6 3-6-3V4z"/><path d="M2 4l6 3 6-3"/><path d="M8 7v8"/></svg>库存状态概览</div>
+            <div style="display:flex;align-items:center;gap:20px;">
+              <div style="width:140px;height:140px;flex-shrink:0;"><canvas id="inv-doughnut-canvas"></canvas></div>
+              <div class="inv-overview" id="inv-overview" style="flex:1;"></div>
+            </div>
+          </div>
+
+          <!-- Recent orders -->
+          <div class="dash-card">
+            <div class="dash-card-title"><svg style="width:16px;height:16px;vertical-align:middle;margin-right:6px;" viewBox="0 0 16 16" fill="none" stroke="var(--primary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h10v12H3z" rx="1"/><path d="M6 1v3"/><path d="M10 1v3"/><path d="M6 8h4"/><path d="M6 11h2"/></svg>最近订单</div>
+            <div id="recent-orders" style="max-height:200px;overflow-y:auto;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== ORDER PAGE ==================== -->
+      <div class="page" id="page-orders">
+        <div class="order-layout">
+          <div class="menu-grid" id="menu-grid"></div>
+          <div class="order-summary">
+            <div class="order-summary-header"><svg style="width:16px;height:16px;vertical-align:middle;margin-right:6px;" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 1h8l2 3v11H2V4l2-3z"/><path d="M2 4h12"/><path d="M6 7h4"/></svg>当前订单</div>
+            <div class="order-items" id="order-items">
+              <div class="order-empty">请从左侧菜单添加菜品</div>
+            </div>
+            <div class="order-footer">
+              <div class="order-total">
+                <span>合计</span>
+                <span id="order-total">RM 0</span>
+              </div>
+              <button class="btn-submit" id="btn-submit" disabled onclick="submitOrder()">下单</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== INVENTORY PAGE ==================== -->
+      <div class="page" id="page-inventory">
+        <div id="inv-alert-area"></div>
+        <table class="inv-table">
+          <thead>
+            <tr>
+              <th>食材名称</th>
+              <th>当前库存</th>
+              <th>最低库存</th>
+              <th>库存比例</th>
+              <th>状态</th>
+            </tr>
+          </thead>
+          <tbody id="inv-tbody"></tbody>
+        </table>
+      </div>
+
+      <!-- ==================== SCHEDULE PAGE ==================== -->
+      <div class="page" id="page-schedule">
+        <div class="schedule-wrap">
+          <div class="schedule-legend">
+            <span><span class="legend-dot" style="background:#DBEAFE;border:1px solid #93C5FD;"></span> 早班 9:00–15:00</span>
+            <span><span class="legend-dot" style="background:#FEF3C7;border:1px solid #FCD34D;"></span> 午班 12:00–18:00</span>
+            <span><span class="legend-dot" style="background:#E0E7FF;border:1px solid #A5B4FC;"></span> 晚班 17:00–23:00</span>
+            <span style="color:var(--danger);font-weight:700;">! 红色 = 排班冲突（时间重叠）</span>
+          </div>
+          <table class="sched-table" id="sched-table"></table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+// ==================== DATA LAYER ====================
+
+// Menu items with ingredient mapping
+const MENU = [
+  { id: 1, name: '海南鸡饭', price: 12, emoji: '🍗', bg: '#DBEAFE', ingredients: { '鸡肉': 0.25, '米饭': 0.3 } },
+  { id: 2, name: '叉烧饭', price: 13, emoji: '🥩', bg: '#FCE7F3', ingredients: { '叉烧': 0.2, '米饭': 0.3 } },
+  { id: 3, name: '云吞面', price: 10, emoji: '🥟', bg: '#FEF3C7', ingredients: { '猪肉': 0.15, '面条': 0.25 } },
+  { id: 4, name: '咖喱面', price: 11, emoji: '🍛', bg: '#FFE4E6', ingredients: { '鸡肉': 0.15, '面条': 0.25, '咖喱酱': 0.1 } },
+  { id: 5, name: '炒粿条', price: 9,  emoji: '🍝', bg: '#E0E7FF', ingredients: { '面条': 0.3, '虾': 0.1 } },
+  { id: 6, name: '虾面', price: 12, emoji: '🦐', bg: '#D1FAE5', ingredients: { '虾': 0.2, '面条': 0.25 } },
+  { id: 7, name: '肉骨茶', price: 15, emoji: '🍖', bg: '#FEF3C7', ingredients: { '猪肉': 0.3, '米饭': 0.3 } },
+  { id: 8, name: '椰浆饭', price: 8,  emoji: '🥥', bg: '#ECFDF5', ingredients: { '米饭': 0.3, '椰浆': 0.15 } },
+];
+
+// Inventory
+let INVENTORY = [
+  { name: '鸡肉', stock: 45, min: 20, unit: 'kg' },
+  { name: '猪肉', stock: 30, min: 15, unit: 'kg' },
+  { name: '虾',   stock: 8,  min: 10, unit: 'kg' },
+  { name: '面条', stock: 25, min: 10, unit: 'kg' },
+  { name: '米饭', stock: 50, min: 20, unit: 'kg' },
+  { name: '椰浆', stock: 5,  min: 8,  unit: 'L' },
+  { name: '咖喱酱', stock: 12, min: 5, unit: 'kg' },
+  { name: '叉烧', stock: 18, min: 8, unit: 'kg' },
+];
+
+// Dashboard data
+let totalRevenue = 2480;
+let totalOrders = 18;
+let ORDER_HISTORY = [];
+
+// Sales ranking (initial)
+let salesRanking = [
+  { name: '海南鸡饭', count: 32 },
+  { name: '肉骨茶', count: 28 },
+  { name: '叉烧饭', count: 25 },
+  { name: '云吞面', count: 22 },
+  { name: '虾面', count: 18 },
+];
+
+// Time slots (initial)
+let timeSlots = [
+  { label: '11-12', count: 5 },
+  { label: '12-1', count: 12 },
+  { label: '1-2', count: 8 },
+  { label: '2-3', count: 4 },
+  { label: '5-6', count: 6 },
+  { label: '6-7', count: 15 },
+  { label: '7-8', count: 10 },
+  { label: '8-9', count: 3 },
+];
+
+// Current order
+let currentOrder = {};
+
+// Chart.js instances
+let salesChart = null;
+let timeChart = null;
+let invDoughnutChart = null;
+
+// Staff & Schedule
+const STAFF = [
+  { name: '阿明', role: '厨师' },
+  { name: '小丽', role: '服务员' },
+  { name: '阿伟', role: '厨师' },
+  { name: '美美', role: '收银' },
+  { name: '老王', role: '清洁' },
+];
+
+const SHIFTS = [
+  { id: 'morning', name: '早班', time: '9:00-15:00', start: 9, end: 15 },
+  { id: 'afternoon', name: '午班', time: '12:00-18:00', start: 12, end: 18 },
+  { id: 'evening', name: '晚班', time: '17:00-23:00', start: 17, end: 23 },
+];
+
+const DAYS = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+
+// Schedule: schedule[staffIndex][dayIndex] = [shiftId, ...]
+let schedule = [
+  // 阿明
+  [['morning'], ['morning'], ['morning','afternoon'], ['morning'], ['morning'], ['evening'], []],
+  // 小丽
+  [['afternoon'], ['afternoon'], ['afternoon'], ['afternoon'], [], ['morning'], ['morning']],
+  // 阿伟
+  [['evening'], ['evening'], ['evening'], [], ['evening'], ['morning'], ['evening']],
+  // 美美
+  [['morning'], ['morning'], [], ['morning'], ['morning'], ['afternoon'], ['afternoon']],
+  // 老王
+  [['afternoon'], [], ['evening'], ['evening'], ['afternoon'], ['evening'], []],
+];
+
+// ==================== LOCALSTORAGE PERSISTENCE ====================
+function saveState() {
+  localStorage.setItem('foodops_orders', JSON.stringify(ORDER_HISTORY));
+  localStorage.setItem('foodops_inventory', JSON.stringify(INVENTORY));
+  localStorage.setItem('foodops_schedule', JSON.stringify(schedule));
+  localStorage.setItem('foodops_stats', JSON.stringify({ totalRevenue, totalOrders }));
+  localStorage.setItem('foodops_salesRanking', JSON.stringify(salesRanking));
+  localStorage.setItem('foodops_timeSlots', JSON.stringify(timeSlots));
+}
+
+function loadState() {
+  try {
+    const savedOrders = localStorage.getItem('foodops_orders');
+    if (savedOrders) ORDER_HISTORY = JSON.parse(savedOrders);
+    const savedInv = localStorage.getItem('foodops_inventory');
+    if (savedInv) INVENTORY = JSON.parse(savedInv);
+    const savedSched = localStorage.getItem('foodops_schedule');
+    if (savedSched) schedule = JSON.parse(savedSched);
+    const savedStats = localStorage.getItem('foodops_stats');
+    if (savedStats) {
+      const stats = JSON.parse(savedStats);
+      totalRevenue = stats.totalRevenue;
+      totalOrders = stats.totalOrders;
+    }
+    const savedSales = localStorage.getItem('foodops_salesRanking');
+    if (savedSales) salesRanking = JSON.parse(savedSales);
+    const savedTime = localStorage.getItem('foodops_timeSlots');
+    if (savedTime) timeSlots = JSON.parse(savedTime);
+  } catch (e) {
+    console.warn('Failed to load saved state:', e);
+  }
+}
+
+function resetAllData() {
+  if (confirm('确定要重置所有数据吗？此操作不可撤销。')) {
+    localStorage.removeItem('foodops_orders');
+    localStorage.removeItem('foodops_inventory');
+    localStorage.removeItem('foodops_schedule');
+    localStorage.removeItem('foodops_stats');
+    localStorage.removeItem('foodops_salesRanking');
+    localStorage.removeItem('foodops_timeSlots');
+    localStorage.removeItem('foodops_darkMode');
+    location.reload();
+  }
+}
+
+// Load state before init
+loadState();
+
+// ==================== NAVIGATION WITH PAGE TRANSITIONS ====================
+function showPage(pageId, skipAnimation) {
+  const currentPage = document.querySelector('.page.active');
+  const nextPage = document.getElementById('page-' + pageId);
+  if (!nextPage || nextPage === currentPage) return;
+
+  // Update nav items
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const navItem = document.querySelector(`.nav-item[data-page="${pageId}"]`);
+  if (navItem) navItem.classList.add('active');
+
+  if (skipAnimation || !currentPage) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    nextPage.classList.add('active');
+    if (pageId === 'dashboard') showDashboardWithSkeleton();
+    return;
+  }
+
+  // Fade out current
+  currentPage.style.opacity = '0';
+  currentPage.style.transform = 'translateY(8px)';
+  setTimeout(() => {
+    currentPage.classList.remove('active');
+    currentPage.style.opacity = '';
+    currentPage.style.transform = '';
+    nextPage.classList.add('active');
+    if (pageId === 'dashboard') showDashboardWithSkeleton();
+  }, 150);
+}
+
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    showPage(item.dataset.page);
+  });
+});
+
+// ==================== SKELETON LOADING ====================
+function showDashboardWithSkeleton() {
+  const kpiGrid = document.querySelector('.kpi-grid');
+  const dashGrid = document.querySelector('.dash-grid');
+  if (!kpiGrid || !dashGrid) return;
+
+  // Save original content
+  const origKpi = kpiGrid.innerHTML;
+  const origDash = dashGrid.innerHTML;
+
+  // Show skeletons
+  kpiGrid.innerHTML = Array(4).fill('<div class="kpi-card skeleton skeleton-kpi"></div>').join('');
+  dashGrid.innerHTML = Array(4).fill('<div class="dash-card skeleton skeleton-card"></div>').join('');
+
+  setTimeout(() => {
+    kpiGrid.innerHTML = origKpi;
+    dashGrid.innerHTML = origDash;
+    renderDashboard(true);
+  }, 300);
+}
+
+// ==================== GLOBAL SEARCH ====================
+const searchInput = document.getElementById('search-input');
+const searchResults = document.getElementById('search-results');
+
+searchInput.addEventListener('input', function() {
+  const q = this.value.trim().toLowerCase();
+  if (!q) { searchResults.classList.remove('open'); return; }
+
+  let html = '';
+  // Search menu items
+  const menuHits = MENU.filter(m => m.name.toLowerCase().includes(q));
+  if (menuHits.length) {
+    html += '<div class="search-group-label">菜品</div>';
+    menuHits.forEach(m => {
+      html += `<div class="search-result-item" onclick="showPage('orders'); searchResults.classList.remove('open'); searchInput.value='';">
+        <span class="sr-icon">${m.emoji}</span><span class="sr-text">${m.name}</span><span class="sr-sub">RM ${m.price}</span></div>`;
+    });
+  }
+  // Search inventory
+  const invHits = INVENTORY.filter(i => i.name.toLowerCase().includes(q));
+  if (invHits.length) {
+    html += '<div class="search-group-label">库存</div>';
+    invHits.forEach(i => {
+      const status = i.stock < i.min ? '偏低' : '充足';
+      html += `<div class="search-result-item" onclick="showPage('inventory'); searchResults.classList.remove('open'); searchInput.value='';">
+        <span class="sr-icon">📦</span><span class="sr-text">${i.name}</span><span class="sr-sub">${i.stock}${i.unit} · ${status}</span></div>`;
+    });
+  }
+  // Search staff
+  const staffHits = STAFF.filter(s => s.name.toLowerCase().includes(q) || s.role.toLowerCase().includes(q));
+  if (staffHits.length) {
+    html += '<div class="search-group-label">员工</div>';
+    staffHits.forEach(s => {
+      html += `<div class="search-result-item" onclick="showPage('schedule'); searchResults.classList.remove('open'); searchInput.value='';">
+        <span class="sr-icon">👤</span><span class="sr-text">${s.name}</span><span class="sr-sub">${s.role}</span></div>`;
+    });
+  }
+
+  if (!html) html = '<div class="search-no-results">未找到相关结果</div>';
+  searchResults.innerHTML = html;
+  searchResults.classList.add('open');
+});
+
+// Close search on outside click
+document.addEventListener('click', function(e) {
+  if (!document.getElementById('search-bar').contains(e.target)) {
+    searchResults.classList.remove('open');
+  }
+});
+
+// ==================== NOTIFICATION CENTER ====================
+let notifications = [];
+
+function generateNotifications() {
+  notifications = [];
+  const now = new Date();
+  // Low inventory
+  INVENTORY.forEach(item => {
+    if (item.stock < item.min) {
+      notifications.push({ icon: '⚠️', type: 'warn', msg: `${item.name} 库存偏低 (${item.stock}${item.unit})`, time: '刚刚', read: false });
+    }
+  });
+  // Schedule conflicts
+  STAFF.forEach((staff, si) => {
+    DAYS.forEach((day, di) => {
+      if (checkConflict(schedule[si][di])) {
+        notifications.push({ icon: '📅', type: 'danger', msg: `${staff.name} 排班冲突 (${day})`, time: '今天', read: false });
+      }
+    });
+  });
+  // Recent orders
+  if (ORDER_HISTORY.length > 0) {
+    const last = ORDER_HISTORY[ORDER_HISTORY.length - 1];
+    notifications.push({ icon: '🧾', type: 'info', msg: `最新订单 #${last.id} RM${last.total}`, time: last.time, read: true });
+  }
+}
+
+function renderNotifications() {
+  generateNotifications();
+  const badge = document.getElementById('notif-badge');
+  const unread = notifications.filter(n => !n.read).length;
+  badge.textContent = unread > 0 ? unread : '';
+
+  const dropdown = document.getElementById('notif-dropdown');
+  if (notifications.length === 0) {
+    dropdown.innerHTML = '<div class="notif-header"><span>通知</span></div><div class="notif-empty">暂无通知</div>';
+    return;
+  }
+
+  let html = `<div class="notif-header"><span>通知 (${unread})</span><span class="mark-all" onclick="markAllRead()">全部已读</span></div>`;
+  notifications.forEach((n, idx) => {
+    html += `<div class="notif-item ${n.read ? '' : 'unread'}" onclick="markNotifRead(${idx})">
+      <div class="ni-icon ${n.type}">${n.icon}</div>
+      <div class="ni-body"><div class="ni-msg">${n.msg}</div><div class="ni-time">${n.time}</div></div>
+    </div>`;
+  });
+  dropdown.innerHTML = html;
+}
+
+function toggleNotifications() {
+  const dropdown = document.getElementById('notif-dropdown');
+  dropdown.classList.toggle('open');
+  // Close search
+  searchResults.classList.remove('open');
+}
+
+function markNotifRead(idx) {
+  if (notifications[idx]) notifications[idx].read = true;
+  renderNotifications();
+}
+
+function markAllRead() {
+  notifications.forEach(n => n.read = true);
+  renderNotifications();
+}
+
+// Close notification on outside click
+document.addEventListener('click', function(e) {
+  const bell = document.getElementById('notif-bell');
+  if (!bell.contains(e.target)) {
+    document.getElementById('notif-dropdown').classList.remove('open');
+  }
+});
+
+// ==================== DARK MODE ====================
+function toggleDarkMode() {
+  const isDark = document.body.classList.toggle('dark-mode');
+  localStorage.setItem('foodops_darkMode', isDark ? '1' : '0');
+  document.getElementById('dark-icon-sun').style.display = isDark ? 'none' : '';
+  document.getElementById('dark-icon-moon').style.display = isDark ? '' : 'none';
+  // Re-render charts with updated colors
+  renderDashboard(false);
+}
+
+// Restore dark mode preference
+(function() {
+  if (localStorage.getItem('foodops_darkMode') === '1') {
+    document.body.classList.add('dark-mode');
+    document.getElementById('dark-icon-sun').style.display = 'none';
+    document.getElementById('dark-icon-moon').style.display = '';
+  }
+})();
+
+// ==================== TOAST ====================
+function showToast(message, type = 'success') {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = 'toast ' + type;
+  const icons = { success: '&#10003;', warning: '!', error: '&#10007;', info: 'i', blue: '&#10003;', amber: '&#10003;', green: '&#10003;' };
+  const iconColors = { success: 'var(--accent)', warning: 'var(--amber)', error: 'var(--danger)', info: 'var(--primary)', blue: 'var(--primary)', amber: 'var(--amber)', green: 'var(--accent)' };
+  toast.innerHTML = `<span style="font-weight:700;color:${iconColors[type] || 'var(--accent)'}">${icons[type] || '&#10003;'}</span><span>${message}</span>`;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+// ==================== COUNT UP ANIMATION (Requirement #3) ====================
+function countUp(element, target, duration = 600, prefix = '', suffix = '') {
+  const start = performance.now();
+  const initial = 0;
+  function update(now) {
+    const elapsed = now - start;
+    const progress = Math.min(elapsed / duration, 1);
+    // ease-out cubic
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const current = Math.round(initial + (target - initial) * eased);
+    element.textContent = prefix + current.toLocaleString() + suffix;
+    if (progress < 1) requestAnimationFrame(update);
+  }
+  requestAnimationFrame(update);
+}
+
+// ==================== DASHBOARD RENDERING ====================
+function renderDashboard(animate = true) {
+  // KPIs with counter animation
+  const revenueEl = document.getElementById('kpi-revenue');
+  const ordersEl = document.getElementById('kpi-orders');
+  const warnings = INVENTORY.filter(i => i.stock < i.min).length;
+  const warningsEl = document.getElementById('kpi-warnings');
+
+  if (animate) {
+    countUp(revenueEl, totalRevenue, 600, 'RM ');
+    const ordersSpan = document.createElement('span');
+    ordersEl.innerHTML = '';
+    ordersEl.appendChild(ordersSpan);
+    const unitSpan = document.createElement('span');
+    unitSpan.className = 'unit';
+    unitSpan.textContent = '单';
+    ordersEl.appendChild(unitSpan);
+    countUp(ordersSpan, totalOrders, 600);
+
+    const warnSpan = document.createElement('span');
+    warningsEl.innerHTML = '';
+    warningsEl.appendChild(warnSpan);
+    const wUnit = document.createElement('span');
+    wUnit.className = 'unit';
+    wUnit.textContent = '项低量';
+    warningsEl.appendChild(wUnit);
+    countUp(warnSpan, warnings, 600);
+  } else {
+    revenueEl.textContent = 'RM ' + totalRevenue.toLocaleString();
+    ordersEl.innerHTML = totalOrders + '<span class="unit">单</span>';
+    warningsEl.innerHTML = warnings + '<span class="unit">项低量</span>';
+  }
+
+  // Trend indicators
+  document.getElementById('trend-revenue').textContent = totalOrders > 18 ? '↑' + Math.round((totalRevenue - 2480) / 2480 * 100) + '%' : '↑12%';
+  document.getElementById('trend-orders').textContent = totalOrders > 18 ? '↑' + (totalOrders - 18) : '↑3';
+
+  // Sales chart (Chart.js horizontal bar)
+  const salesBarColors = ['#2563EB', '#10B981', '#F59E0B', '#3B82F6', '#34D399'];
+  if (salesChart) salesChart.destroy();
+  const salesCtx = document.getElementById('sales-chart-canvas').getContext('2d');
+  salesChart = new Chart(salesCtx, {
+    type: 'bar',
+    data: {
+      labels: salesRanking.map(s => s.name),
+      datasets: [{
+        data: salesRanking.map(s => s.count),
+        backgroundColor: salesRanking.map((_, i) => salesBarColors[i % salesBarColors.length]),
+        borderRadius: 6,
+        barThickness: 22,
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1E293B',
+          titleFont: { family: "'Plus Jakarta Sans', sans-serif", size: 13 },
+          bodyFont: { family: "'DM Sans', sans-serif", size: 12 },
+          padding: 10,
+          cornerRadius: 8,
+          callbacks: { label: ctx => ctx.parsed.x + ' 份' }
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { family: "'DM Sans', sans-serif", size: 12 } } },
+        y: { grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { font: { family: "'DM Sans', sans-serif", size: 12 } } }
+      },
+      animation: { duration: 600, easing: 'easeOutCubic' }
+    },
+    plugins: [{
+      afterDatasetsDraw(chart) {
+        const ctx2 = chart.ctx;
+        chart.data.datasets[0].data.forEach((val, i) => {
+          const meta = chart.getDatasetMeta(0).data[i];
+          ctx2.save();
+          ctx2.fillStyle = '#475569';
+          ctx2.font = "600 11px 'DM Sans', sans-serif";
+          ctx2.textAlign = 'left';
+          ctx2.textBaseline = 'middle';
+          ctx2.fillText(val + '份', meta.x + 6, meta.y);
+          ctx2.restore();
+        });
+      }
+    }]
+  });
+
+  // Time chart (Chart.js vertical bar)
+  if (timeChart) timeChart.destroy();
+  const timeCtx = document.getElementById('time-chart-canvas').getContext('2d');
+  timeChart = new Chart(timeCtx, {
+    type: 'bar',
+    data: {
+      labels: timeSlots.map(t => t.label),
+      datasets: [{
+        data: timeSlots.map(t => t.count),
+        backgroundColor: timeSlots.map(t => t.count >= 10 ? '#2563EB' : '#93C5FD'),
+        borderRadius: 6,
+        barThickness: 28,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1E293B',
+          titleFont: { family: "'Plus Jakarta Sans', sans-serif", size: 13 },
+          bodyFont: { family: "'DM Sans', sans-serif", size: 12 },
+          padding: 10,
+          cornerRadius: 8,
+          callbacks: { label: ctx => ctx.parsed.y + ' 单' }
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { family: "'DM Sans', sans-serif", size: 12 } } },
+        y: { grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { font: { family: "'DM Sans', sans-serif", size: 12 } }, beginAtZero: true }
+      },
+      animation: { duration: 600, easing: 'easeOutCubic' }
+    }
+  });
+
+  // Inventory overview
+  const ok = INVENTORY.filter(i => i.stock >= i.min * 1.5).length;
+  const low = INVENTORY.filter(i => i.stock >= i.min && i.stock < i.min * 1.5).length;
+  const out = INVENTORY.filter(i => i.stock < i.min).length;
+  document.getElementById('inv-overview').innerHTML = `
+    <div class="inv-mini ok"><div class="inv-mini-val">${ok}</div><div class="inv-mini-label">充足</div></div>
+    <div class="inv-mini low"><div class="inv-mini-val">${low}</div><div class="inv-mini-label">偏低</div></div>
+    <div class="inv-mini out"><div class="inv-mini-val">${out}</div><div class="inv-mini-label">缺货 / 低量</div></div>
+  `;
+
+  // Inventory doughnut chart
+  if (invDoughnutChart) invDoughnutChart.destroy();
+  const doughnutCtx = document.getElementById('inv-doughnut-canvas').getContext('2d');
+  invDoughnutChart = new Chart(doughnutCtx, {
+    type: 'doughnut',
+    data: {
+      labels: ['充足', '偏低', '缺货'],
+      datasets: [{
+        data: [ok, low, out],
+        backgroundColor: ['#10B981', '#F59E0B', '#F43F5E'],
+        borderWidth: 0,
+        spacing: 2,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '60%',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1E293B',
+          titleFont: { family: "'Plus Jakarta Sans', sans-serif", size: 13 },
+          bodyFont: { family: "'DM Sans', sans-serif", size: 12 },
+          padding: 10,
+          cornerRadius: 8,
+        }
+      },
+      animation: { duration: 600, easing: 'easeOutCubic' }
+    },
+    plugins: [{
+      afterDatasetsDraw(chart) {
+        const ctx2 = chart.ctx;
+        const dataset = chart.data.datasets[0];
+        const meta = chart.getDatasetMeta(0);
+        meta.data.forEach((arc, i) => {
+          if (dataset.data[i] === 0) return;
+          const { x, y } = arc.tooltipPosition();
+          ctx2.save();
+          ctx2.fillStyle = '#fff';
+          ctx2.font = "700 12px 'Plus Jakarta Sans', sans-serif";
+          ctx2.textAlign = 'center';
+          ctx2.textBaseline = 'middle';
+          ctx2.fillText(dataset.data[i], x, y);
+          ctx2.restore();
+        });
+      }
+    }]
+  });
+
+  // Recent orders
+  const ro = document.getElementById('recent-orders');
+  if (ORDER_HISTORY.length === 0) {
+    ro.innerHTML = '<div class="order-empty" style="padding:20px;">暂无订单记录</div>';
+  } else {
+    ro.innerHTML = ORDER_HISTORY.slice(-5).reverse().map(o =>
+      `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #F1F5F9;font-size:13px;font-variant-numeric:tabular-nums;">
+        <span style="font-weight:500;">#${o.id} · ${o.items.map(i => i.name).join(', ')}</span>
+        <span style="font-weight:700;color:var(--primary);">RM ${o.total}</span>
+      </div>`
+    ).join('');
+  }
+
+  // Update notification badges (Requirement #6)
+  updateBadges();
+}
+
+// ==================== MENU / ORDER ====================
+function renderMenu() {
+  document.getElementById('menu-grid').innerHTML = MENU.map(item => `
+    <div class="menu-card">
+      <div class="menu-emoji" style="background:${item.bg}">${item.emoji}</div>
+      <div class="menu-name">${item.name}</div>
+      <div class="menu-price">RM ${item.price}</div>
+      <div class="menu-qty">
+        <button class="qty-btn" onclick="changeQty(${item.id}, -1)">−</button>
+        <span class="qty-val" id="qty-${item.id}">${currentOrder[item.id] || 0}</span>
+        <button class="qty-btn" onclick="changeQty(${item.id}, 1)">+</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function changeQty(id, delta) {
+  const cur = currentOrder[id] || 0;
+  const next = Math.max(0, cur + delta);
+  if (next === 0) delete currentOrder[id];
+  else currentOrder[id] = next;
+  const qtyEl = document.getElementById('qty-' + id);
+  qtyEl.textContent = next;
+  // Qty badge scale animation (Requirement #8)
+  qtyEl.classList.remove('qty-pop');
+  void qtyEl.offsetWidth; // force reflow
+  qtyEl.classList.add('qty-pop');
+  renderOrderSummary();
+  // Order summary highlight (Requirement #8)
+  if (delta > 0) {
+    const summaryEl = document.querySelector('.order-summary');
+    if (summaryEl) {
+      summaryEl.classList.remove('summary-highlight');
+      void summaryEl.offsetWidth;
+      summaryEl.classList.add('summary-highlight');
+    }
+  }
+}
+
+function renderOrderSummary() {
+  const keys = Object.keys(currentOrder);
+  const itemsEl = document.getElementById('order-items');
+  const totalEl = document.getElementById('order-total');
+  const btn = document.getElementById('btn-submit');
+
+  if (keys.length === 0) {
+    itemsEl.innerHTML = '<div class="order-empty">请从左侧菜单添加菜品</div>';
+    totalEl.textContent = 'RM 0';
+    btn.disabled = true;
+    return;
+  }
+
+  let total = 0;
+  itemsEl.innerHTML = keys.map(id => {
+    const item = MENU.find(m => m.id == id);
+    const qty = currentOrder[id];
+    const sub = item.price * qty;
+    total += sub;
+    return `<div class="order-item">
+      <span class="order-item-name">${item.emoji} ${item.name} × ${qty}</span>
+      <span class="order-item-detail">RM ${sub}</span>
+    </div>`;
+  }).join('');
+
+  totalEl.textContent = 'RM ' + total;
+  btn.disabled = false;
+}
+
+function submitOrder() {
+  const keys = Object.keys(currentOrder);
+  if (keys.length === 0) return;
+
+  let total = 0;
+  const items = [];
+
+  // 1. Build order & deduct inventory
+  keys.forEach(id => {
+    const item = MENU.find(m => m.id == id);
+    const qty = currentOrder[id];
+    total += item.price * qty;
+    items.push({ name: item.name, qty, subtotal: item.price * qty });
+
+    // Deduct ingredients
+    Object.entries(item.ingredients).forEach(([ing, amount]) => {
+      const inv = INVENTORY.find(i => i.name === ing);
+      if (inv) {
+        inv.stock = Math.max(0, parseFloat((inv.stock - amount * qty).toFixed(2)));
+      }
+    });
+  });
+
+  // 2. Save order
+  const orderId = totalOrders + 1;
+  ORDER_HISTORY.push({ id: orderId, items, total, time: new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }) });
+
+  // 3. Update KPIs
+  totalRevenue += total;
+  totalOrders += 1;
+
+  // 4. Update sales ranking
+  items.forEach(orderItem => {
+    const existing = salesRanking.find(s => s.name === orderItem.name);
+    if (existing) existing.count += orderItem.qty;
+    else salesRanking.push({ name: orderItem.name, count: orderItem.qty });
+  });
+  salesRanking.sort((a, b) => b.count - a.count);
+  salesRanking = salesRanking.slice(0, 5);
+
+  // 5. Update time slot (add to current hour)
+  const hour = new Date().getHours();
+  // Pick the closest slot
+  const slotIdx = Math.min(7, Math.max(0, hour >= 17 ? hour - 13 : hour - 7));
+  if (timeSlots[slotIdx]) timeSlots[slotIdx].count += 1;
+
+  // 6. Track affected ingredients for row highlight
+  const affectedIngredients = new Set();
+  keys.forEach(id => {
+    const item = MENU.find(m => m.id == id);
+    Object.keys(item.ingredients).forEach(ing => affectedIngredients.add(ing));
+  });
+
+  // 7. Clear order
+  currentOrder = {};
+
+  // 8. Check for low stock items
+  const newLowItems = INVENTORY.filter(i => i.stock < i.min).map(i => i.name);
+
+  // 9. Re-render everything
+  renderMenu();
+  renderOrderSummary();
+  renderDashboard();
+  renderInventory();
+
+  // 10. Row highlight for affected inventory rows (Requirement #5)
+  document.querySelectorAll('#inv-tbody tr').forEach(row => {
+    const nameCell = row.querySelector('.name');
+    if (nameCell && affectedIngredients.has(nameCell.textContent)) {
+      row.classList.add('row-updated');
+      setTimeout(() => row.classList.remove('row-updated'), 1500);
+    }
+  });
+
+  // 11. Sequential toast chain (Requirement #2)
+  showToast('订单已提交', 'blue');
+  confetti({ particleCount: 80, spread: 60, origin: { y: 0.7 }, colors: ['#2563EB', '#10B981', '#F59E0B'] });
+  setTimeout(() => {
+    showToast('库存已扣减', 'amber');
+  }, 500);
+  setTimeout(() => {
+    showToast('Dashboard已更新', 'green');
+  }, 1000);
+
+  // 12. Sidebar sequential glow (Requirement #2)
+  const navOrders = document.getElementById('nav-orders');
+  const navInventory = document.getElementById('nav-inventory');
+  const navDashboard = document.getElementById('nav-dashboard');
+  navOrders.classList.add('sync-pulse');
+  setTimeout(() => {
+    navOrders.classList.remove('sync-pulse');
+    navInventory.classList.add('sync-pulse');
+  }, 800);
+  setTimeout(() => {
+    navInventory.classList.remove('sync-pulse');
+    navDashboard.classList.add('sync-pulse');
+  }, 1600);
+  setTimeout(() => {
+    navDashboard.classList.remove('sync-pulse');
+  }, 2400);
+
+  // 13. Low stock warning
+  if (newLowItems.length > 0) {
+    setTimeout(() => {
+      showToast('库存警告: ' + newLowItems.join(', ') + ' 低于最低库存', 'warning');
+    }, 1500);
+  }
+
+  // 14. Update badges
+  updateBadges();
+
+  // 15. Persist state & update notifications
+  saveState();
+  renderNotifications();
+}
+
+// ==================== INVENTORY RENDERING ====================
+function renderInventory() {
+  const lowItems = INVENTORY.filter(i => i.stock < i.min);
+  const alertArea = document.getElementById('inv-alert-area');
+  if (lowItems.length > 0) {
+    alertArea.innerHTML = `<div class="alert-banner">
+      <span class="icon"><svg style="width:18px;height:18px;" viewBox="0 0 16 16" fill="none" stroke="#9F1239" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1L1 14h14L8 1z"/><path d="M8 6v4"/><circle cx="8" cy="12" r="0.5" fill="#9F1239"/></svg></span>
+      <span>库存预警: ${lowItems.map(i => `<strong>${i.name}</strong> (${i.stock}${i.unit} / 最低${i.min}${i.unit})`).join(' · ')}</span>
+    </div>`;
+  } else {
+    alertArea.innerHTML = '';
+  }
+
+  const maxStock = Math.max(...INVENTORY.map(i => Math.max(i.stock, i.min * 2)));
+  document.getElementById('inv-tbody').innerHTML = INVENTORY.map(item => {
+    const pct = (item.stock / (item.min * 2.5)) * 100;
+    const status = item.stock < item.min ? (item.stock < item.min * 0.5 ? 'out' : 'low') : 'ok';
+    const statusText = status === 'ok' ? '充足' : (status === 'low' ? '偏低' : '缺货');
+    const barColor = status === 'ok' ? 'var(--accent)' : (status === 'low' ? 'var(--amber)' : 'var(--danger)');
+    return `<tr>
+      <td class="name">${item.name}</td>
+      <td>${item.stock} ${item.unit}</td>
+      <td>${item.min} ${item.unit}</td>
+      <td>
+        <div class="stock-bar-wrap">
+          <div class="stock-bar-fill" style="width:${Math.min(100, pct)}%;background:${barColor}"></div>
+        </div>
+      </td>
+      <td><span class="badge ${status}">${statusText}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+// ==================== SCHEDULE RENDERING ====================
+function checkConflict(shifts) {
+  for (let i = 0; i < shifts.length; i++) {
+    for (let j = i + 1; j < shifts.length; j++) {
+      const a = SHIFTS.find(s => s.id === shifts[i]);
+      const b = SHIFTS.find(s => s.id === shifts[j]);
+      if (a && b && a.start < b.end && b.start < a.end) return true;
+    }
+  }
+  return false;
+}
+
+function renderSchedule() {
+  const table = document.getElementById('sched-table');
+  let html = '<thead><tr><th>员工</th>';
+  DAYS.forEach(d => html += `<th>${d}</th>`);
+  html += '</tr></thead><tbody>';
+
+  STAFF.forEach((staff, si) => {
+    html += `<tr><td>${staff.name}<br><span class="role">${staff.role}</span></td>`;
+    DAYS.forEach((_, di) => {
+      const shifts = schedule[si][di];
+      const hasConflict = checkConflict(shifts);
+      html += '<td><div class="shift-cell">';
+      shifts.forEach(shiftId => {
+        const shift = SHIFTS.find(s => s.id === shiftId);
+        const conflictClass = hasConflict ? ' conflict' : '';
+        html += `<div class="shift-tag ${shiftId}${conflictClass}" onclick="removeShift(${si},${di},'${shiftId}')" title="点击移除">${hasConflict ? '! ' : ''}${shift.name}</div>`;
+      });
+      // Add empty slot button if less than 2 shifts
+      if (shifts.length < 2) {
+        html += `<div class="shift-empty" onclick="addShift(${si},${di})" title="点击添加">+</div>`;
+      }
+      html += '</div></td>';
+    });
+    html += '</tr>';
+  });
+
+  html += '</tbody>';
+  table.innerHTML = html;
+}
+
+let shiftCycle = 0;
+function addShift(staffIdx, dayIdx) {
+  const shiftId = SHIFTS[shiftCycle % SHIFTS.length].id;
+  shiftCycle++;
+  if (!schedule[staffIdx][dayIdx].includes(shiftId)) {
+    schedule[staffIdx][dayIdx].push(shiftId);
+  }
+  // Check conflict
+  if (checkConflict(schedule[staffIdx][dayIdx])) {
+    showToast('排班冲突: ' + STAFF[staffIdx].name + ' 在 ' + DAYS[dayIdx] + ' 的班次时间重叠!', 'error');
+  }
+  renderSchedule();
+  initSortableSchedule();
+  updateBadges();
+  saveState();
+  renderNotifications();
+}
+
+function removeShift(staffIdx, dayIdx, shiftId) {
+  schedule[staffIdx][dayIdx] = schedule[staffIdx][dayIdx].filter(s => s !== shiftId);
+  renderSchedule();
+  initSortableSchedule();
+  updateBadges();
+  saveState();
+  renderNotifications();
+  showToast('已移除 ' + STAFF[staffIdx].name + ' ' + DAYS[dayIdx] + ' 的班次', 'info');
+}
+
+// ==================== NOTIFICATION BADGES (Requirement #6) ====================
+function updateBadges() {
+  // Inventory badge: count of items below min stock
+  const lowStockCount = INVENTORY.filter(i => i.stock < i.min).length;
+  const invBadge = document.getElementById('badge-inventory');
+  if (invBadge) {
+    invBadge.textContent = lowStockCount > 0 ? lowStockCount : '';
+  }
+
+  // Schedule badge: show "1" if there's a scheduling conflict
+  let hasConflict = false;
+  for (let si = 0; si < STAFF.length && !hasConflict; si++) {
+    for (let di = 0; di < DAYS.length && !hasConflict; di++) {
+      if (checkConflict(schedule[si][di])) hasConflict = true;
+    }
+  }
+  const schedBadge = document.getElementById('badge-schedule');
+  if (schedBadge) {
+    schedBadge.textContent = hasConflict ? '1' : '';
+  }
+}
+
+// ==================== INIT ====================
+renderDashboard();
+renderMenu();
+renderOrderSummary();
+renderInventory();
+renderSchedule();
+updateBadges();
+renderNotifications();
+initSortableSchedule();
+
+// ==================== SORTABLEJS DRAG-AND-DROP SCHEDULING ====================
+function initSortableSchedule() {
+  // Wait a tick for DOM to be ready
+  setTimeout(() => {
+    document.querySelectorAll('.shift-cell').forEach(cell => {
+      if (cell._sortable) cell._sortable.destroy();
+      cell._sortable = new Sortable(cell, {
+        group: 'schedule-shifts',
+        animation: 150,
+        ghostClass: 'sortable-ghost',
+        chosenClass: 'sortable-chosen',
+        filter: '.shift-empty',
+        onEnd: function(evt) {
+          handleShiftDrop(evt);
+        }
+      });
+    });
+  }, 50);
+}
+
+function handleShiftDrop(evt) {
+  // Parse source and target cells
+  const fromCell = evt.from;
+  const toCell = evt.to;
+  const draggedEl = evt.item;
+
+  // Get shift ID from class
+  let shiftId = null;
+  ['morning', 'afternoon', 'evening'].forEach(s => {
+    if (draggedEl.classList.contains(s)) shiftId = s;
+  });
+  if (!shiftId) { renderSchedule(); initSortableSchedule(); return; }
+
+  // Find staff/day indices from table structure
+  function getCellInfo(cell) {
+    const td = cell.closest('td');
+    const tr = td.closest('tr');
+    const tbody = tr.closest('tbody');
+    const rows = Array.from(tbody.children);
+    const staffIdx = rows.indexOf(tr);
+    const cells = Array.from(tr.children);
+    const dayIdx = cells.indexOf(td) - 1; // -1 for name column
+    return { staffIdx, dayIdx };
+  }
+
+  const from = getCellInfo(fromCell);
+  const to = getCellInfo(toCell);
+
+  // Remove from source
+  schedule[from.staffIdx][from.dayIdx] = schedule[from.staffIdx][from.dayIdx].filter(s => s !== shiftId);
+
+  // Add to target (if not already there)
+  if (!schedule[to.staffIdx][to.dayIdx].includes(shiftId)) {
+    schedule[to.staffIdx][to.dayIdx].push(shiftId);
+  }
+
+  // Check conflict at target
+  if (checkConflict(schedule[to.staffIdx][to.dayIdx])) {
+    showToast('排班冲突: ' + STAFF[to.staffIdx].name + ' 在 ' + DAYS[to.dayIdx] + ' 的班次时间重叠!', 'warning');
+  }
+
+  renderSchedule();
+  initSortableSchedule();
+  updateBadges();
+  saveState();
+  renderNotifications();
+}
+</script>
+</body>
+</html>
