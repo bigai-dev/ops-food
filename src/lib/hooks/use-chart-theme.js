@@ -2,15 +2,6 @@ import { useMemo } from 'react'
 
 export function useChartTheme(demo, isDark) {
   return useMemo(() => {
-    // Read actual computed CSS variables from the themed element
-    // so chart colors always match the current theme automatically
-    const themeEl = document.querySelector('[data-theme]') || document.body
-    const style = getComputedStyle(themeEl)
-
-    // Get the actual card background to derive readable colors
-    const cardBg = style.getPropertyValue('--color-card').trim()
-    const fg = style.getPropertyValue('--color-foreground').trim()
-
     // Chart-specific colors that work in both modes
     return {
       primary: '#2563EB',

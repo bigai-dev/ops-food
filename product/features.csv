@@ -1,5 +1,5 @@
 name,reach,impact,confidence,effort,description
-SST Tax Calculation & Invoice,10000,massive,high,m,"Malaysia 8% SST compliance with proper tax invoices — legal requirement for all F&B businesses"
+SST Tax Calculation & Invoice,10000,massive,high,m,"Malaysia 6% SST compliance with proper tax invoices — legal requirement for all F&B businesses"
 Multi-language Support (BM/CN/EN),10000,high,high,m,"Trilingual UI for Malaysia's multilingual workforce — Bahasa Melayu, Chinese, English"
 Receipt & Kitchen Ticket Printing,8000,massive,high,m,"Thermal printer integration for receipts (customer) and kitchen order tickets (BOH)"
 Backend Database & Auth,10000,massive,high,xl,"Replace localStorage with real DB (Supabase/Neon), add staff login with role-based access"

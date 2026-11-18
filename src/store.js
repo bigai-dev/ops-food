@@ -4,7 +4,25 @@ import {
   DEFAULT_INVENTORY, DEFAULT_SALES_RANKING, DEFAULT_TIME_SLOTS,
   DEFAULT_SCHEDULE, DEFAULT_STAFF_SETTINGS, DEFAULT_SCHEDULE_CONFIG,
   DEFAULT_ORDERS, DEFAULT_TABLE_CONFIG, MENU, STAFF, SST_RATE, KDS_STATUSES,
-} from './data'
+} from './data.js'
+
+// Demo starting point — used on first load, by "Reset data", and when saved data is outdated
+const initialState = () => ({
+  inventory: structuredClone(DEFAULT_INVENTORY),
+  orders: structuredClone(DEFAULT_ORDERS),
+  totalRevenue: 7610.8, // today so far: 283 orders × ~RM 27 (incl. 6% SST)
+  totalOrders: 283,
+  totalCogs: 2790,
+  totalSst: 430.8,
+  salesRanking: structuredClone(DEFAULT_SALES_RANKING),
+  timeSlots: structuredClone(DEFAULT_TIME_SLOTS),
+  schedule: structuredClone(DEFAULT_SCHEDULE),
+  staffSettings: structuredClone(DEFAULT_STAFF_SETTINGS),
+  scheduleConfig: structuredClone(DEFAULT_SCHEDULE_CONFIG),
+  tables: Array(DEFAULT_TABLE_CONFIG.length).fill(null), // null = available, orderId = occupied
+  tableConfig: structuredClone(DEFAULT_TABLE_CONFIG), // { id, seats, x, y }[]
+  tableOrder: [], // array of table IDs in display order; empty = use tableConfig order
+})
 
 export const useFoodOpsStore = create(
   persist(
@@ -12,20 +30,7 @@ export const useFoodOpsStore = create(
       // ==========================================
       // State
       // ==========================================
-      inventory: structuredClone(DEFAULT_INVENTORY),
-      orders: structuredClone(DEFAULT_ORDERS),
-      totalRevenue: 48650,
-      totalOrders: 283,
-      totalCogs: 18420,
-      totalSst: 3892,
-      salesRanking: structuredClone(DEFAULT_SALES_RANKING),
-      timeSlots: structuredClone(DEFAULT_TIME_SLOTS),
-      schedule: structuredClone(DEFAULT_SCHEDULE),
-      staffSettings: structuredClone(DEFAULT_STAFF_SETTINGS),
-      scheduleConfig: structuredClone(DEFAULT_SCHEDULE_CONFIG),
-      tables: Array(10).fill(null), // null = available, orderId = occupied
-      tableConfig: structuredClone(DEFAULT_TABLE_CONFIG), // { id, seats }[]
-      tableOrder: [], // array of table IDs in display order; empty = use tableConfig order
+      ...initialState(),
 
       // ==========================================
       // Staff Settings
@@ -91,7 +96,7 @@ export const useFoodOpsStore = create(
           return { ...inv, stock: Math.max(0, +(inv.stock - deduction).toFixed(2)) }
         })
 
-        // Update sales ranking (immutable)
+        // Update sales ranking (immutable) — keeps every dish so any of them can climb into the top 5
         let newRanking = state.salesRanking.map(r => ({ ...r }))
         items.forEach(item => {
           const itemNameZh = typeof item.name === 'string' ? item.name : item.name?.zh || ''
@@ -104,17 +109,18 @@ export const useFoodOpsStore = create(
         })
         newRanking.sort((a, b) => b.count - a.count)
 
-        // Update time slots
+        // Update time slots — the slot whose start hour is closest to now (the shop closes 3-5pm)
         const hour = new Date().getHours()
         const newTimeSlots = [...state.timeSlots]
-        const slotIndex = Math.min(Math.max(0, hour - 11), newTimeSlots.length - 1)
+        const slotIndex = DEFAULT_TIME_SLOTS.reduce((best, slot, i) =>
+          Math.abs(slot.start - hour) < Math.abs(DEFAULT_TIME_SLOTS[best].start - hour) ? i : best, 0)
         if (newTimeSlots[slotIndex]) {
           newTimeSlots[slotIndex] = { ...newTimeSlots[slotIndex], count: newTimeSlots[slotIndex].count + 1 }
         }
 
         // Update tables — use config index, not tableId - 1
         const newTables = [...state.tables]
-        const orderId = state.orders.length + 1
+        const orderId = state.orders.reduce((max, o) => Math.max(max, o.id), 0) + 1
         if (orderType === 'dine-in' && tableId) {
           const tIdx = state.tableConfig.findIndex(t => t.id === tableId)
           if (tIdx >= 0) newTables[tIdx] = orderId
@@ -143,7 +149,7 @@ export const useFoodOpsStore = create(
           totalOrders: state.totalOrders + 1,
           totalCogs: +(state.totalCogs + cogs).toFixed(2),
           totalSst: +(state.totalSst + sst).toFixed(2),
-          salesRanking: newRanking.slice(0, 5),
+          salesRanking: newRanking,
           timeSlots: newTimeSlots,
           tables: newTables,
         })
@@ -164,12 +170,12 @@ export const useFoodOpsStore = create(
             return { ...order, status: nextStatus }
           })
 
-          // Free table when dine-in order is served
+          // Free table when dine-in order is served (unless new guests with another order sit there now)
           const order = newOrders.find(o => o.id === orderId)
           let newTables = state.tables
           if (order?.status === 'served' && order.orderType === 'dine-in' && order.tableId) {
             const tIdx = state.tableConfig.findIndex(t => t.id === order.tableId)
-            if (tIdx >= 0) {
+            if (tIdx >= 0 && state.tables[tIdx] === orderId) {
               newTables = [...state.tables]
               newTables[tIdx] = null
             }
@@ -192,16 +198,17 @@ export const useFoodOpsStore = create(
         })
       },
 
-      addTable: (seats = 4) => {
+      addTable: (seats = 4, position = null) => {
         set(state => {
           const maxId = state.tableConfig.reduce((max, t) => Math.max(max, t.id), 0)
           const newId = maxId + 1
           const order = state.tableOrder.length > 0 ? [...state.tableOrder, newId] : []
-          // Assign a default position offset from existing tables
+          // Use the free spot picked on the floor plan, else a default position offset from existing tables
           const col = state.tableConfig.length % 5
           const row = Math.floor(state.tableConfig.length / 5)
+          const { x, y } = position || { x: 60 + col * 170, y: 60 + row * 170 }
           return {
-            tableConfig: [...state.tableConfig, { id: newId, seats, x: 60 + col * 170, y: 60 + row * 170 }],
+            tableConfig: [...state.tableConfig, { id: newId, seats, x, y }],
             tables: [...state.tables, null],
             tableOrder: order,
           }
@@ -285,23 +292,19 @@ export const useFoodOpsStore = create(
         )
         const counts = Array(staffCount).fill(0)
 
-        const consecutive = (si, day) => {
-          let c = 0
-          for (let d = day - 1; d >= 0; d--) {
-            if (sched[si][d].length > 0) c++; else break
-          }
-          return c
-        }
-
         const canAssign = (si, day) => {
           const s = settings[si]
           if (sched[si][day].length > 0) return false
           if (counts[si] >= s.maxShiftsPerWeek) return false
           if (s.unavailableDays.includes(day)) return false
-          if (consecutive(si, day) >= s.maxConsecutiveDays) return false
-          const daysLeft = dayCount - day
-          const restNeeded = s.minRestDays - (sched[si].filter(d => d.length === 0).length - (sched[si][day].length === 0 ? 1 : 0))
-          if (daysLeft - 1 < restNeeded && restNeeded > 0) return false
+          // Days are not filled in order, so count the working streak on both sides of this day
+          let streak = 1
+          for (let d = day - 1; d >= 0 && sched[si][d].length > 0; d--) streak++
+          for (let d = day + 1; d < dayCount && sched[si][d].length > 0; d++) streak++
+          if (streak > s.maxConsecutiveDays) return false
+          // Working this day must still leave enough days off in the week
+          const daysOffAfter = sched[si].filter(d => d.length === 0).length - 1
+          if (daysOffAfter < s.minRestDays) return false
           return true
         }
 
@@ -382,31 +385,12 @@ export const useFoodOpsStore = create(
         }
 
         set({ schedule: sched })
+        return sched
       },
 
       // ==========================================
-      // Notifications & Helpers
+      // Helpers
       // ==========================================
-      getNotifications: () => {
-        const state = get()
-        const notifs = []
-        state.inventory.forEach(item => {
-          const nameZh = typeof item.name === 'string' ? item.name : item.name.zh
-          if (item.stock < item.min) {
-            notifs.push({ text: `⚠️ ${nameZh} 库存偏低 (${item.stock}${item.unit})` })
-          }
-        })
-        return notifs
-      },
-
-      getLowStockCount: () => {
-        return get().inventory.filter(i => i.stock < i.min).length
-      },
-
-      getNewOrderCount: () => {
-        return get().orders.filter(o => o.status === 'new').length
-      },
-
       getOrderById: (orderId) => {
         return get().orders.find(o => o.id === orderId)
       },
@@ -415,43 +399,13 @@ export const useFoodOpsStore = create(
       // Reset
       // ==========================================
       resetAll: () => {
-        set({
-          inventory: structuredClone(DEFAULT_INVENTORY),
-          orders: structuredClone(DEFAULT_ORDERS),
-          totalRevenue: 2480,
-          totalOrders: 18,
-          totalCogs: 980,
-          totalSst: 198.40,
-          salesRanking: structuredClone(DEFAULT_SALES_RANKING),
-          timeSlots: structuredClone(DEFAULT_TIME_SLOTS),
-          schedule: structuredClone(DEFAULT_SCHEDULE),
-          staffSettings: structuredClone(DEFAULT_STAFF_SETTINGS),
-          scheduleConfig: structuredClone(DEFAULT_SCHEDULE_CONFIG),
-          tables: Array(10).fill(null),
-          tableConfig: structuredClone(DEFAULT_TABLE_CONFIG),
-          tableOrder: [],
-        })
+        set(initialState())
       },
     }),
     {
       name: 'foodops_store',
-      version: 6,
-      migrate: () => ({
-        inventory: structuredClone(DEFAULT_INVENTORY),
-        orders: structuredClone(DEFAULT_ORDERS),
-        totalRevenue: 48650,
-        totalOrders: 283,
-        totalCogs: 18420,
-        totalSst: 3892,
-        salesRanking: structuredClone(DEFAULT_SALES_RANKING),
-        timeSlots: structuredClone(DEFAULT_TIME_SLOTS),
-        schedule: structuredClone(DEFAULT_SCHEDULE),
-        staffSettings: structuredClone(DEFAULT_STAFF_SETTINGS),
-        scheduleConfig: structuredClone(DEFAULT_SCHEDULE_CONFIG),
-        tables: Array(10).fill(null),
-        tableConfig: structuredClone(DEFAULT_TABLE_CONFIG),
-        tableOrder: [],
-      }),
+      version: 7, // bump to reload sample data in browsers that saved the old numbers
+      migrate: () => initialState(),
     }
   )
 )

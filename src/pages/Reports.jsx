@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useMemo } from 'react'
 import { AreaChart, Area, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts'
 import { Card, CardContent } from '@/components/ui/card'
 import { ChartCard } from '@/components/ChartCard'
@@ -6,28 +6,43 @@ import { Badge } from '@/components/ui/badge'
 import { useFoodOpsStore } from '@/store'
 import { useDarkMode } from '@/lib/hooks/use-dark-mode'
 import { useChartTheme } from '@/lib/hooks/use-chart-theme'
-import { MENU, PAYMENT_METHODS, menuName } from '@/data'
+import { MENU, PAYMENT_METHODS, DAYS } from '@/data'
 import { useI18n } from '@/i18n/I18nContext'
+
+// Random numbers that repeat for the whole day, so the forecast doesn't change on every visit
+function dailyRandom() {
+  let seed = 0
+  for (const ch of new Date().toDateString()) seed = (seed * 31 + ch.charCodeAt(0)) | 0
+  return () => {
+    seed = (seed + 0x6D2B79F5) | 0
+    let r = Math.imul(seed ^ (seed >>> 15), seed | 1)
+    r ^= r + Math.imul(r ^ (r >>> 7), r | 61)
+    return ((r ^ (r >>> 14)) >>> 0) / 4294967296
+  }
+}
 
 // ==========================================
 // AI Forecast Engine (simulated from real data)
 // ==========================================
 function generateForecasts(orders, inventory, salesRanking, timeSlots, totalRevenue, totalOrders, totalCogs) {
+  const random = dailyRandom()
   // Estimate avg ticket from menu prices (RM 8-15, avg ~11), then derive daily orders
   const menuAvgPrice = MENU.reduce((s, m) => s + m.price, 0) / MENU.length
   const avgTicket = Math.round(menuAvgPrice * 2.2) // typical 2+ items per order ≈ RM 24
-  const dailyOrders = Math.max(10, Math.round(totalOrders / 7)) // assume ~1 week of data
+  const dailyOrders = Math.max(10, totalOrders) // dashboard totals are for today
   const dailyRevenue = Math.round(dailyOrders * avgTicket)
   const margin = totalRevenue > 0 ? (totalRevenue - totalCogs) / totalRevenue : 0.6
 
-  // 7-day revenue forecast with trend + seasonality
-  const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+  // 7-day revenue forecast (tomorrow onwards) with trend + seasonality; weekday index 0 = Monday, as in DAYS
   const dayMultipliers = [0.8, 0.85, 0.9, 1.0, 1.25, 1.4, 1.1]
-  const weeklyForecast = dayLabels.map((day, i) => {
-    const predicted = Math.round(dailyRevenue * dayMultipliers[i] * (0.92 + Math.random() * 0.16))
+  const weeklyForecast = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date()
+    d.setDate(d.getDate() + i + 1)
+    const weekday = (d.getDay() + 6) % 7
+    const predicted = Math.round(dailyRevenue * dayMultipliers[weekday] * (0.92 + random() * 0.16))
     const lower = Math.round(predicted * 0.82)
     const upper = Math.round(predicted * 1.18)
-    return { day, predicted, lower, upper }
+    return { weekday, predicted, lower, upper }
   })
 
   // Peak hour prediction — normalize time slot counts to per-day averages
@@ -37,23 +52,24 @@ function generateForecasts(orders, inventory, salesRanking, timeSlots, totalReve
   const peakHour = peakHours[0] || { label: '12-1', perDay: 8 }
   const quietHour = peakHours[peakHours.length - 1] || { label: '2-3', perDay: 2 }
 
-  // Menu item velocity + trend analysis
-  const menuInsights = salesRanking.map((item, i) => {
+  // Menu item velocity + trend analysis (top 5 sellers)
+  const menuInsights = salesRanking.slice(0, 5).map((item, i) => {
     const trend = i < 2 ? 'up' : i > 3 ? 'down' : 'stable'
-    const trendPct = trend === 'up' ? Math.round(8 + Math.random() * 15) : trend === 'down' ? -Math.round(3 + Math.random() * 10) : Math.round(-2 + Math.random() * 4)
+    const trendPct = trend === 'up' ? Math.round(8 + random() * 15) : trend === 'down' ? -Math.round(3 + random() * 10) : Math.round(-2 + random() * 4)
     const menuItem = MENU.find(m => {
       const nameZh = typeof m.name === 'string' ? m.name : m.name.zh
       return nameZh === item.name
     })
     const profitMargin = menuItem ? ((menuItem.price - menuItem.costPerServing) / menuItem.price * 100) : 60
-    return { ...item, trend, trendPct, profitMargin: Math.round(profitMargin), price: menuItem?.price || 0 }
+    // name becomes the { zh, en, bm } menu name so it can be shown in the current language
+    return { ...item, name: menuItem?.name || item.name, trend, trendPct, profitMargin: Math.round(profitMargin), price: menuItem?.price || 0 }
   })
 
   // Ingredient demand forecast — daily usage from order volume and recipe ratios
   const ingredientForecast = inventory.map(inv => {
     const nameZh = typeof inv.name === 'string' ? inv.name : inv.name.zh
     // Realistic daily usage: proportional to daily orders and min stock level
-    const dailyUsage = +(inv.min / 5 + Math.random() * inv.min * 0.08).toFixed(1)
+    const dailyUsage = +(inv.min / 5 + random() * inv.min * 0.08).toFixed(1)
     const daysLeft = dailyUsage > 0 ? Math.round(inv.stock / dailyUsage) : 99
     const riskLevel = daysLeft <= 3 ? 'critical' : daysLeft <= 7 ? 'warning' : 'safe'
     const reorderQty = Math.max(0, Math.round((inv.min * 1.5 - inv.stock + dailyUsage * 5)))
@@ -71,14 +87,14 @@ function generateForecasts(orders, inventory, salesRanking, timeSlots, totalReve
     }
   }).sort((a, b) => a.daysLeft - b.daysLeft)
 
-  // Revenue trend (simulated last 14 days)
+  // Revenue trend (simulated): actual for the last 10 days up to today, forecast running 4 days ahead
   const revenueTrend = Array.from({ length: 14 }, (_, i) => {
     const d = new Date()
-    d.setDate(d.getDate() - (13 - i))
+    d.setDate(d.getDate() + (i - 9))
     const dayOfWeek = d.getDay()
     const mult = [1.1, 0.8, 0.85, 0.9, 1.0, 1.25, 1.4][dayOfWeek]
-    const actual = i < 10 ? Math.round(dailyRevenue * mult * (0.9 + Math.random() * 0.2)) : null
-    const forecast = Math.round(dailyRevenue * mult * (0.95 + Math.random() * 0.1))
+    const actual = i < 10 ? Math.round(dailyRevenue * mult * (0.9 + random() * 0.2)) : null
+    const forecast = Math.round(dailyRevenue * mult * (0.95 + random() * 0.1))
     return {
       date: `${d.getMonth() + 1}/${d.getDate()}`,
       actual,
@@ -286,7 +302,7 @@ export function Reports() {
 
           <InsightCard icon="💡" title={t('reports.insight_menu')} severity="success">
             {forecast.menuInsights[0] && t('reports.insight_menu_text', {
-              item: forecast.menuInsights[0].name,
+              item: ln(forecast.menuInsights[0].name),
               pct: forecast.menuInsights[0].trendPct,
               margin: forecast.menuInsights[0].profitMargin
             })}
@@ -303,7 +319,7 @@ export function Reports() {
         {/* 7-Day Revenue Forecast */}
         <ChartCard title={`📅 ${t('reports.weeklyForecast')}`} className="stagger-item">
           <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={forecast.weeklyForecast} margin={{ left: -10, right: 10, top: 5 }}>
+            <BarChart data={forecast.weeklyForecast.map(d => ({ ...d, day: ln(DAYS[d.weekday]) }))} margin={{ left: -10, right: 10, top: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke={theme.grid} vertical={false} />
               <XAxis dataKey="day" tick={{ fill: theme.muted, fontSize: 14 }} />
               <YAxis tick={{ fill: theme.muted, fontSize: 14 }} />
@@ -328,7 +344,7 @@ export function Reports() {
                 <span className="text-base font-bold tabular-nums w-7 text-center" style={{ color: 'var(--color-muted-foreground)' }}>#{i + 1}</span>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-base font-semibold truncate" style={{ color: 'var(--color-foreground)' }}>{item.name}</span>
+                    <span className="text-base font-semibold truncate" style={{ color: 'var(--color-foreground)' }}>{ln(item.name)}</span>
                     <TrendArrow value={item.trendPct} />
                   </div>
                   <div className="flex items-center gap-3 mt-0.5">

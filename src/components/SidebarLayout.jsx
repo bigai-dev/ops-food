@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
+import { useI18n } from '@/i18n/I18nContext'
 import { TopBar } from './TopBar'
 
 function MenuIcon() {
@@ -11,6 +12,7 @@ function MenuIcon() {
 }
 
 function SidebarNav({ navItems, title, icon, onResetData }) {
+  const { t } = useI18n()
   return (
     <div className="flex flex-col h-full text-white w-55" style={{ background: 'var(--demo-sidebar-bg, #0F172A)' }}>
       <div style={{ padding: '24px 20px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
@@ -52,20 +54,18 @@ function SidebarNav({ navItems, title, icon, onResetData }) {
       <div className="px-3 py-3 border-t border-white/10 space-y-2">
         {onResetData && (
           <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <div className="flex items-center gap-2 px-3 py-2 w-full rounded-lg text-sm text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer" role="button" tabIndex={0}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
-                重置数据
-              </div>
+            <AlertDialogTrigger className="flex items-center gap-2 px-3 py-2 w-full rounded-lg text-sm text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+              {t('common.reset')}
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>确定重置所有数据？</AlertDialogTitle>
-                <AlertDialogDescription>此操作将清除所有订单、库存变更和排班数据，恢复到初始状态。此操作不可撤销。</AlertDialogDescription>
+                <AlertDialogTitle>{t('common.resetConfirm')}</AlertDialogTitle>
+                <AlertDialogDescription>{t('common.resetDesc')}</AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>取消</AlertDialogCancel>
-                <AlertDialogAction onClick={onResetData} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">确认重置</AlertDialogAction>
+                <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+                <AlertDialogAction onClick={onResetData} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">{t('common.confirm')}</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
@@ -76,6 +76,7 @@ function SidebarNav({ navItems, title, icon, onResetData }) {
 }
 
 export function SidebarLayout({ navItems, title, icon, theme, notifications, onResetData }) {
+  const { t } = useI18n()
   const [mobileOpen, setMobileOpen] = useState(false)
 
   return (
@@ -86,14 +87,12 @@ export function SidebarLayout({ navItems, title, icon, theme, notifications, onR
 
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
         <div className="md:hidden fixed top-0 left-0 z-40 p-2">
-          <SheetTrigger asChild>
-            <div className="inline-flex items-center justify-center h-9 w-9 rounded-md bg-card shadow-md cursor-pointer hover:bg-accent text-foreground" role="button" tabIndex={0}>
-              <MenuIcon />
-            </div>
+          <SheetTrigger aria-label={t('common.navigation')} className="inline-flex items-center justify-center h-9 w-9 rounded-md bg-card shadow-md cursor-pointer hover:bg-accent text-foreground">
+            <MenuIcon />
           </SheetTrigger>
         </div>
         <SheetContent side="left" className="p-0 w-55">
-          <SheetTitle className="sr-only">{title} 导航</SheetTitle>
+          <SheetTitle className="sr-only">{title} {t('common.navigation')}</SheetTitle>
           <SidebarNav navItems={navItems} title={title} icon={icon} onResetData={onResetData} />
         </SheetContent>
       </Sheet>

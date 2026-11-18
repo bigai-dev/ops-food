@@ -93,7 +93,7 @@ _Add revenue-driving and operational features_
 ## Malaysia-Specific Requirements
 
 ### Legal & Compliance
-- **SST (Sales & Service Tax)**: 8% on F&B, must appear on invoice
+- **SST (Sales & Service Tax)**: 6% service tax on F&B, must appear on invoice
 - **LHDN e-Invoice**: Malaysia's mandatory e-invoicing (phased rollout 2024-2025)
 - **Halal compliance**: Track ingredient halal status, certification expiry
 - **Labor law**: Minimum wage RM1,500, OT rates, EPF/SOCSO contributions

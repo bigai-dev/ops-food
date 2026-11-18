@@ -5,7 +5,6 @@ export function useCountUp(target, duration = 600) {
   const ref = useRef(null)
 
   useEffect(() => {
-    if (target === 0) { setValue(0); return }
     const start = performance.now()
     const from = 0
 

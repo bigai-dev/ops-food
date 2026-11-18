@@ -79,7 +79,7 @@
 | `table_id` | INTEGER | Yes | `3` | FK → `tables.id`. NULL if takeaway/delivery |
 | `payment_method` | VARCHAR(20) | No | `duitnow` | `cash`, `duitnow`, `tng`, `grabpay`, `fpx`, `card` |
 | `subtotal` | DECIMAL(10,2) | No | `35.00` | Before SST |
-| `sst` | DECIMAL(10,2) | No | `2.80` | 8% of subtotal |
+| `sst` | DECIMAL(10,2) | No | `2.10` | 6% of subtotal |
 | `total` | DECIMAL(10,2) | No | `37.80` | subtotal + sst |
 | `cogs` | DECIMAL(10,2) | No | `14.30` | Total ingredient cost |
 | `status` | ENUM | No | `new` | `new`, `cooking`, `ready`, `served` |
@@ -184,13 +184,13 @@
 | Column | Type | Nullable | Example | Notes |
 |--------|------|----------|---------|-------|
 | `key` | VARCHAR(50) | No | `sst_rate` | Primary Key |
-| `value` | TEXT | No | `0.08` | String value (parse as needed) |
+| `value` | TEXT | No | `0.06` | String value (parse as needed) |
 | `description` | TEXT | Yes | `SST tax rate` | Human-readable description |
 
 **Example rows:**
 | key | value | description |
 |-----|-------|-------------|
-| `sst_rate` | `0.08` | Sales & Service Tax rate (8%) |
+| `sst_rate` | `0.06` | Sales & Service Tax rate (6%) |
 | `business_name_zh` | `好味轩` | Restaurant name (Chinese) |
 | `business_name_en` | `HaoWei Restaurant` | Restaurant name (English) |
 | `business_name_bm` | `Restoran HaoWei` | Restaurant name (Bahasa Melayu) |

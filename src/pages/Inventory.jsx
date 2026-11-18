@@ -130,10 +130,8 @@ export function Inventory() {
                   </TableCell>
                   <TableCell className="text-center">
                     <Popover>
-                      <PopoverTrigger asChild>
-                        <Button variant="outline" size="sm" className="h-7 text-xs px-2.5">
-                          + {t('inventory.restock')}
-                        </Button>
+                      <PopoverTrigger render={<Button variant="outline" size="sm" className="h-7 text-xs px-2.5" />}>
+                        + {t('inventory.restock')}
                       </PopoverTrigger>
                       <PopoverContent className="w-48 p-3" align="end">
                         <p className="text-xs font-semibold mb-2 heading-font">{name}</p>

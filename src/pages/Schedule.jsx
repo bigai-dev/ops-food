@@ -9,9 +9,9 @@ import { useI18n } from '@/i18n/I18nContext'
 import { useDarkMode } from '@/lib/hooks/use-dark-mode'
 
 const SHIFT_STYLE = {
-  morning: { bg: '#DBEAFE', text: '#1E40AF', border: '#93C5FD', label: '早', darkBg: 'rgba(59,130,246,0.25)', darkText: '#93C5FD' },
-  afternoon: { bg: '#FEF3C7', text: '#92400E', border: '#FCD34D', label: '午', darkBg: 'rgba(245,158,11,0.25)', darkText: '#FCD34D' },
-  evening: { bg: '#E0E7FF', text: '#3730A3', border: '#A5B4FC', label: '晚', darkBg: 'rgba(129,140,248,0.25)', darkText: '#A5B4FC' },
+  morning: { bg: '#DBEAFE', text: '#1E40AF', border: '#93C5FD', darkBg: 'rgba(59,130,246,0.25)', darkText: '#93C5FD' },
+  afternoon: { bg: '#FEF3C7', text: '#92400E', border: '#FCD34D', darkBg: 'rgba(245,158,11,0.25)', darkText: '#FCD34D' },
+  evening: { bg: '#E0E7FF', text: '#3730A3', border: '#A5B4FC', darkBg: 'rgba(129,140,248,0.25)', darkText: '#A5B4FC' },
 }
 
 function checkConflict(shifts) {
@@ -43,6 +43,7 @@ export function Schedule() {
   const { t, locale } = useI18n()
   const { isDark } = useDarkMode()
   const schedule = useFoodOpsStore(s => s.schedule)
+  const staffSettings = useFoodOpsStore(s => s.staffSettings)
   const updateSchedule = useFoodOpsStore(s => s.updateSchedule)
   const autoArrange = useFoodOpsStore(s => s.autoArrange)
   const { showChain } = useToast()
@@ -60,12 +61,15 @@ export function Schedule() {
   const handleAutoArrange = () => {
     setArranging(true)
     setTimeout(() => {
-      autoArrange()
+      const arranged = autoArrange()
       setArranging(false)
+      const perPerson = arranged.map(row => row.reduce((c, dayShifts) => c + dayShifts.length, 0))
+      const fewest = Math.min(...perPerson)
+      const most = Math.max(...perPerson)
       showChain([
         { text: `🤖 ${t('schedule.autoArrange')} ✅`, type: 'success' },
-        { text: '📋 按角色偏好分配，每人5-6班/周', type: 'info' },
-        { text: '✅ 无冲突，周末加强覆盖', type: 'info' },
+        { text: `📋 ${t('schedule.arrangedSummary', { range: fewest === most ? fewest : `${fewest}–${most}` })}`, type: 'info' },
+        { text: `✅ ${t('schedule.noClashes')}`, type: 'info' },
       ])
       import('canvas-confetti').then(m => m.default({
         particleCount: 60, spread: 50, origin: { y: 0.7 },
@@ -115,8 +119,10 @@ export function Schedule() {
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         {STAFF.map((staff, si) => {
           const count = staffShiftCounts[si]
-          const isLight = count < 4
-          const isHeavy = count > 6
+          // Compare with this person's own limit from Settings (same fair minimum auto-arrange aims for)
+          const maxShifts = staffSettings[si]?.maxShiftsPerWeek ?? 6
+          const isLight = count < Math.ceil(maxShifts * 0.6)
+          const isHeavy = count > maxShifts
           const restDays = schedule[si].filter(d => d.length === 0).length
           const shiftBreakdown = {}
           schedule[si].forEach(day => day.forEach(s => { shiftBreakdown[s] = (shiftBreakdown[s] || 0) + 1 }))
@@ -144,7 +150,7 @@ export function Schedule() {
                   const s = SHIFT_STYLE[sid]
                   return (
                     <div key={sid} className="flex-1 rounded text-center py-0.5" style={{ background: c > 0 ? (isDark ? s.darkBg : s.bg) : (isDark ? 'rgba(255,255,255,0.06)' : 'var(--color-muted)'), fontSize: 11, fontWeight: 600, color: c > 0 ? (isDark ? s.darkText : s.text) : 'var(--color-muted-foreground)' }}>
-                      {s.label}{c > 0 ? ` ${c}` : ''}
+                      {t(`schedule.${sid}Short`)}{c > 0 ? ` ${c}` : ''}
                     </div>
                   )
                 })}
@@ -200,27 +206,25 @@ export function Schedule() {
                   return (
                     <td key={di} className="p-1.5 text-center" style={hasConflict ? { background: 'rgba(239,68,68,0.06)' } : undefined}>
                       <Popover>
-                        <PopoverTrigger asChild>
-                          <button className="w-full rounded-lg p-2 transition-all duration-150 hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring cursor-pointer" style={{ minHeight: 44 }}>
-                            {isRestDay ? (
-                              <span className="text-xs text-muted-foreground/50">{t('schedule.rest')}</span>
-                            ) : (
-                              <div className="flex flex-wrap gap-1 justify-center">
-                                {cellShifts.map(shiftId => {
-                                  const s = SHIFT_STYLE[shiftId]
-                                  if (!s) return null
-                                  const shift = SHIFTS.find(x => x.id === shiftId)
-                                  return (
-                                    <span key={shiftId} className="inline-flex items-center justify-center rounded-md text-xs font-semibold"
-                                      style={{ background: hasConflict ? 'rgba(239,68,68,0.1)' : (isDark ? s.darkBg : s.bg), color: hasConflict ? '#DC2626' : (isDark ? s.darkText : s.text), border: `1px solid ${hasConflict ? '#FCA5A5' : (isDark ? 'transparent' : s.border)}`, padding: '3px 10px', fontSize: 12 }}>
-                                      {shiftName(shift, locale)}
-                                    </span>
-                                  )
-                                })}
-                              </div>
-                            )}
-                            {hasConflict && <div className="text-[10px] text-red-500 font-semibold mt-0.5">⚠</div>}
-                          </button>
+                        <PopoverTrigger className="w-full rounded-lg p-2 transition-all duration-150 hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring cursor-pointer" style={{ minHeight: 44 }}>
+                          {isRestDay ? (
+                            <span className="text-xs text-muted-foreground/50">{t('schedule.rest')}</span>
+                          ) : (
+                            <div className="flex flex-wrap gap-1 justify-center">
+                              {cellShifts.map(shiftId => {
+                                const s = SHIFT_STYLE[shiftId]
+                                if (!s) return null
+                                const shift = SHIFTS.find(x => x.id === shiftId)
+                                return (
+                                  <span key={shiftId} className="inline-flex items-center justify-center rounded-md text-xs font-semibold"
+                                    style={{ background: hasConflict ? 'rgba(239,68,68,0.1)' : (isDark ? s.darkBg : s.bg), color: hasConflict ? '#DC2626' : (isDark ? s.darkText : s.text), border: `1px solid ${hasConflict ? '#FCA5A5' : (isDark ? 'transparent' : s.border)}`, padding: '3px 10px', fontSize: 12 }}>
+                                    {shiftName(shift, locale)}
+                                  </span>
+                                )
+                              })}
+                            </div>
+                          )}
+                          {hasConflict && <div className="text-[10px] text-red-500 font-semibold mt-0.5">⚠</div>}
                         </PopoverTrigger>
                         <PopoverContent className="w-52 p-2" align="center">
                           <p className="text-xs font-semibold text-muted-foreground mb-2 px-1" style={{ fontFamily: 'var(--font-heading)' }}>

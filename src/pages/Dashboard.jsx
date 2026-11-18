@@ -7,7 +7,7 @@ import { useFoodOpsStore } from '@/store'
 import { useDarkMode } from '@/lib/hooks/use-dark-mode'
 import { useChartTheme } from '@/lib/hooks/use-chart-theme'
 import { useI18n } from '@/i18n/I18nContext'
-import { PAYMENT_METHODS, ORDER_TYPES, menuName } from '@/data'
+import { MENU, PAYMENT_METHODS, ORDER_TYPES, menuName } from '@/data'
 
 const PAYMENT_COLORS = ['#3B82F6', '#10B981', '#6366F1', '#22C55E', '#F59E0B', '#EF4444']
 
@@ -21,9 +21,10 @@ export function Dashboard() {
   const lowStockCount = inventory.filter(i => i.stock < i.min).length
   const margin = totalRevenue > 0 ? Math.round((totalRevenue - totalCogs) / totalRevenue * 100) : 0
 
-  const okCount = inventory.filter(i => i.stock >= i.min * 1.5).length
-  const lowCount = inventory.filter(i => i.stock >= i.min && i.stock < i.min * 1.5).length
-  const critCount = inventory.filter(i => i.stock < i.min).length
+  // Same status rules as the Inventory page
+  const okCount = inventory.filter(i => i.stock >= i.min).length
+  const lowCount = inventory.filter(i => i.stock >= i.min * 0.5 && i.stock < i.min).length
+  const critCount = inventory.filter(i => i.stock < i.min * 0.5).length
   const invData = [
     { name: t('common.sufficient'), value: okCount, color: '#10B981' },
     { name: t('common.low'), value: lowCount, color: '#F59E0B' },
@@ -38,6 +39,12 @@ export function Dashboard() {
   const paymentData = Object.entries(paymentMap).map(([id, count]) => {
     const pm = PAYMENT_METHODS.find(p => p.id === id)
     return { name: pm ? ln(pm.name) : id, value: count }
+  })
+
+  // Top 5 dishes in the current language (the ranking is kept by Chinese dish name)
+  const topSellers = salesRanking.slice(0, 5).map(r => {
+    const dish = MENU.find(m => m.name.zh === r.name)
+    return { ...r, name: dish ? menuName(dish, locale) : r.name }
   })
 
   return (
@@ -88,13 +95,13 @@ export function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
         <ChartCard title={`🔥 ${t('dashboard.hotSellers')}`} className="lg:col-span-2 stagger-item">
           <ResponsiveContainer width="100%" height={240}>
-            <BarChart data={salesRanking} layout="vertical" margin={{ left: 10, right: 20, top: 5 }}>
+            <BarChart data={topSellers} layout="vertical" margin={{ left: 10, right: 20, top: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke={theme.grid} horizontal={false} />
               <XAxis type="number" tick={{ fill: theme.muted, fontSize: 12 }} />
-              <YAxis type="category" dataKey="name" width={75} tick={{ fill: theme.label || theme.text, fontSize: 14, fontWeight: 700 }} />
+              <YAxis type="category" dataKey="name" width={locale === 'zh' ? 75 : 120} tick={{ fill: theme.label || theme.text, fontSize: locale === 'zh' ? 14 : 12, fontWeight: 700 }} />
               <Tooltip contentStyle={{ background: theme.bg, color: theme.text, border: `1px solid ${theme.grid}`, borderRadius: 10, fontSize: 13 }} />
               <Bar dataKey="count" name={t('reports.portions')} radius={[0, 6, 6, 0]} animationDuration={800}>
-                {salesRanking.map((_, i) => (
+                {topSellers.map((_, i) => (
                   <Cell key={i} fill={theme.colors[i % theme.colors.length]} />
                 ))}
               </Bar>
@@ -184,7 +191,7 @@ export function Dashboard() {
                         <span className="text-xs font-mono text-muted-foreground w-8">#{order.id}</span>
                         {orderTypeObj && <span className="text-sm">{orderTypeObj.icon}</span>}
                         <span className="text-sm">
-                          {order.items.map(i => `${menuName({ name: i.name }, locale)}×${i.qty}`).join('、')}
+                          {order.items.map(i => `${menuName({ name: i.name }, locale)}×${i.qty}`).join(locale === 'zh' ? '、' : ', ')}
                         </span>
                       </div>
                       <div className="flex items-center gap-3">

@@ -54,7 +54,7 @@ export function TopBar({ notifications = [], logo }) {
           variant="ghost"
           size="icon"
           className="h-9 w-9 relative"
-          aria-label={`通知${notifications.length > 0 ? ` (${notifications.length} 条新通知)` : ''}`}
+          aria-label={`${t('common.notifications')}${notifications.length > 0 ? ` (${t('common.newCount', { count: notifications.length })})` : ''}`}
           onClick={() => setShowNotifications(!showNotifications)}
         >
           <BellIcon />
@@ -65,12 +65,15 @@ export function TopBar({ notifications = [], logo }) {
           )}
         </Button>
 
-        {showNotifications && notifications.length > 0 && (
+        {showNotifications && (
           <div className="absolute right-0 top-full mt-2 w-72 bg-card border border-border rounded-lg shadow-lg z-50 overflow-hidden">
             <div className="p-3 border-b border-border font-semibold text-sm heading-font">
-              通知 ({notifications.length})
+              {t('common.notifications')} ({notifications.length})
             </div>
             <div className="max-h-64 overflow-y-auto">
+              {notifications.length === 0 && (
+                <div className="px-3 py-2.5 text-sm text-muted-foreground">{t('common.noNotifications')}</div>
+              )}
               {notifications.map((n, i) => (
                 <div key={i} className="px-3 py-2.5 text-sm border-b border-border last:border-0 hover:bg-muted/50">
                   {n.text || n}
@@ -98,7 +101,7 @@ export function TopBar({ notifications = [], logo }) {
         ))}
       </div>
 
-      <Button variant="ghost" size="icon" className="h-9 w-9" onClick={toggle} aria-label={isDark ? '切换到亮色模式' : '切换到暗色模式'}>
+      <Button variant="ghost" size="icon" className="h-9 w-9" onClick={toggle} aria-label={isDark ? t('common.lightMode') : t('common.darkMode')}>
         {isDark ? <SunIcon /> : <MoonIcon />}
       </Button>
     </div>

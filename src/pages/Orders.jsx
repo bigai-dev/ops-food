@@ -42,8 +42,6 @@ export function Orders() {
   const sst = +(subtotal * SST_RATE).toFixed(2)
   const total = +(subtotal + sst).toFixed(2)
 
-  const availableTables = tableConfig.filter((_, idx) => !tables[idx])
-
   const handleSubmit = () => {
     if (orderItems.length === 0) return
     if (orderType === 'dine-in' && !tableId) return
@@ -56,7 +54,7 @@ export function Orders() {
     setTableId(null)
 
     showChain([
-      { text: `✅ ${t('orders.submitted')} #${order.id} — RM ${order.total}`, type: 'success' },
+      { text: `✅ ${t('orders.submitted')} #${order.id} — RM ${order.total.toFixed(2)}`, type: 'success' },
       { text: `📦 ${t('orders.inventoryDeducted')}`, type: 'info' },
       { text: `📊 ${t('orders.dashboardUpdated')}`, type: 'info' },
     ])
@@ -124,7 +122,7 @@ export function Orders() {
                 <div className="text-center py-6 space-y-3">
                   <div className="text-4xl">✅</div>
                   <p className="font-semibold heading-font">{t('orders.submitted')} #{lastOrder.id}</p>
-                  <p className="text-lg font-bold">RM {lastOrder.total}</p>
+                  <p className="text-lg font-bold">RM {lastOrder.total.toFixed(2)}</p>
                   <Button variant="outline" className="w-full" onClick={() => setShowReceipt(true)}>
                     🧾 {t('orders.viewReceipt')}
                   </Button>
@@ -229,7 +227,7 @@ export function Orders() {
                       <span className="tabular-nums">RM {subtotal.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">{t('orders.sst')}</span>
+                      <span className="text-muted-foreground">{t('orders.sst', { rate: SST_RATE * 100 })}</span>
                       <span className="tabular-nums">RM {sst.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between font-bold text-lg pt-1">

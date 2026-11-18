@@ -36,7 +36,7 @@ export const translations = {
     'orders.selectHint': '从左侧菜单选择菜品',
     'orders.addHint': '点击 + 添加到订单',
     'orders.subtotal': '小计',
-    'orders.sst': 'SST (8%)',
+    'orders.sst': 'SST ({rate}%)',
     'orders.total': '合计',
     'orders.submit': '提交订单',
     'orders.orderType': '订单类型',
@@ -82,6 +82,8 @@ export const translations = {
     'tables.entrance': '入口',
     'tables.counter': '柜台',
     'tables.orderDetails': '订单详情',
+    'tables.gridView': '网格',
+    'tables.floorView': '平面图',
 
     // Inventory
     'inventory.title': '库存管理',
@@ -117,6 +119,11 @@ export const translations = {
     'schedule.restDays': '天休息',
     'schedule.tooMany': '偏多',
     'schedule.tooFew': '偏少',
+    'schedule.morningShort': '早',
+    'schedule.afternoonShort': '午',
+    'schedule.eveningShort': '晚',
+    'schedule.arrangedSummary': '已按偏好分配，每人每周 {range} 班',
+    'schedule.noClashes': '无排班冲突',
 
     // Settings
     'settings.title': '排班设定',
@@ -178,7 +185,7 @@ export const translations = {
     'receipt.table': '桌号',
     'receipt.payment': '付款方式',
     'receipt.subtotal': '小计',
-    'receipt.sst': 'SST (8%)',
+    'receipt.sst': 'SST ({rate}%)',
     'receipt.total': '总计',
     'receipt.thankYou': '谢谢光临！',
     'receipt.sstReg': 'SST 注册号',
@@ -199,6 +206,11 @@ export const translations = {
     'common.evening': '晚班',
     'common.noNotifications': '暂无通知',
     'common.stockLow': '库存偏低',
+    'common.notifications': '通知',
+    'common.newCount': '{count} 条新通知',
+    'common.darkMode': '切换到暗色模式',
+    'common.lightMode': '切换到亮色模式',
+    'common.navigation': '导航',
   },
 
   en: {
@@ -238,7 +250,7 @@ export const translations = {
     'orders.selectHint': 'Select items from the menu',
     'orders.addHint': 'Tap + to add to order',
     'orders.subtotal': 'Subtotal',
-    'orders.sst': 'SST (8%)',
+    'orders.sst': 'SST ({rate}%)',
     'orders.total': 'Total',
     'orders.submit': 'Submit Order',
     'orders.orderType': 'Order Type',
@@ -284,6 +296,8 @@ export const translations = {
     'tables.entrance': 'Entrance',
     'tables.counter': 'Counter',
     'tables.orderDetails': 'Order Details',
+    'tables.gridView': 'Grid',
+    'tables.floorView': 'Floor',
 
     // Inventory
     'inventory.title': 'Inventory',
@@ -319,6 +333,11 @@ export const translations = {
     'schedule.restDays': 'days off',
     'schedule.tooMany': 'Heavy',
     'schedule.tooFew': 'Light',
+    'schedule.morningShort': 'Morn',
+    'schedule.afternoonShort': 'Aft',
+    'schedule.eveningShort': 'Eve',
+    'schedule.arrangedSummary': 'Assigned by preference: {range} shifts per person',
+    'schedule.noClashes': 'No shift clashes',
 
     // Settings
     'settings.title': 'Schedule Settings',
@@ -380,7 +399,7 @@ export const translations = {
     'receipt.table': 'Table',
     'receipt.payment': 'Payment',
     'receipt.subtotal': 'Subtotal',
-    'receipt.sst': 'SST (8%)',
+    'receipt.sst': 'SST ({rate}%)',
     'receipt.total': 'Total',
     'receipt.thankYou': 'Thank you for dining with us!',
     'receipt.sstReg': 'SST Reg No',
@@ -401,6 +420,11 @@ export const translations = {
     'common.evening': 'Evening',
     'common.noNotifications': 'No notifications',
     'common.stockLow': 'stock low',
+    'common.notifications': 'Notifications',
+    'common.newCount': '{count} new',
+    'common.darkMode': 'Switch to dark mode',
+    'common.lightMode': 'Switch to light mode',
+    'common.navigation': 'Navigation',
   },
 
   bm: {
@@ -440,7 +464,7 @@ export const translations = {
     'orders.selectHint': 'Pilih item dari menu',
     'orders.addHint': 'Tekan + untuk tambah',
     'orders.subtotal': 'Jumlah Kecil',
-    'orders.sst': 'SST (8%)',
+    'orders.sst': 'SST ({rate}%)',
     'orders.total': 'Jumlah',
     'orders.submit': 'Hantar Pesanan',
     'orders.orderType': 'Jenis Pesanan',
@@ -486,6 +510,8 @@ export const translations = {
     'tables.entrance': 'Pintu Masuk',
     'tables.counter': 'Kaunter',
     'tables.orderDetails': 'Butiran Pesanan',
+    'tables.gridView': 'Grid',
+    'tables.floorView': 'Pelan Lantai',
 
     // Inventory
     'inventory.title': 'Inventori',
@@ -521,6 +547,11 @@ export const translations = {
     'schedule.restDays': 'hari cuti',
     'schedule.tooMany': 'Banyak',
     'schedule.tooFew': 'Sedikit',
+    'schedule.morningShort': 'Pagi',
+    'schedule.afternoonShort': 'Tgh',
+    'schedule.eveningShort': 'Mlm',
+    'schedule.arrangedSummary': 'Ikut pilihan: {range} syif seorang seminggu',
+    'schedule.noClashes': 'Tiada pertindihan syif',
 
     // Settings
     'settings.title': 'Tetapan Jadual',
@@ -582,7 +613,7 @@ export const translations = {
     'receipt.table': 'Meja',
     'receipt.payment': 'Bayaran',
     'receipt.subtotal': 'Jumlah Kecil',
-    'receipt.sst': 'SST (8%)',
+    'receipt.sst': 'SST ({rate}%)',
     'receipt.total': 'Jumlah',
     'receipt.thankYou': 'Terima kasih kerana berkunjung!',
     'receipt.sstReg': 'No Pendaftaran SST',
@@ -603,5 +634,10 @@ export const translations = {
     'common.evening': 'Malam',
     'common.noNotifications': 'Tiada pemberitahuan',
     'common.stockLow': 'stok rendah',
+    'common.notifications': 'Pemberitahuan',
+    'common.newCount': '{count} baharu',
+    'common.darkMode': 'Tukar ke mod gelap',
+    'common.lightMode': 'Tukar ke mod cerah',
+    'common.navigation': 'Navigasi',
   },
 }

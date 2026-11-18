@@ -65,6 +65,7 @@ Other available commands:
 | `npm run build`   | Build an optimized production bundle to `dist/` |
 | `npm run preview` | Serve the built bundle locally              |
 | `npm run lint`    | Run ESLint                                  |
+| `npm test`        | Run the store tests in `tests/`             |
 
 This project has no backend and no environment variables — all data lives in your browser's `localStorage`. To start fresh, use the reset option in the sidebar or clear the site's local storage in your browser dev tools.
 

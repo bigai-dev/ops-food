@@ -23,15 +23,17 @@ const NAV_ICONS = {
 }
 
 export function FoodOpsLayout() {
-  const { t } = useI18n()
-  const getNotifications = useFoodOpsStore(s => s.getNotifications)
-  const getLowStockCount = useFoodOpsStore(s => s.getLowStockCount)
-  const getNewOrderCount = useFoodOpsStore(s => s.getNewOrderCount)
+  const { t, ln } = useI18n()
+  // Subscribe to the data itself so badges and alerts update as soon as orders or stock change
+  const inventory = useFoodOpsStore(s => s.inventory)
+  const newOrderCount = useFoodOpsStore(s => s.orders.filter(o => o.status === 'new').length)
   const resetAll = useFoodOpsStore(s => s.resetAll)
 
-  const notifications = getNotifications()
-  const lowStockCount = getLowStockCount()
-  const newOrderCount = getNewOrderCount()
+  const lowStockItems = inventory.filter(i => i.stock < i.min)
+  const lowStockCount = lowStockItems.length
+  const notifications = lowStockItems.map(item => ({
+    text: `⚠️ ${ln(item.name)} ${t('common.stockLow')} (${item.stock}${item.unit})`,
+  }))
 
   const navItems = [
     { path: '/', label: t('nav.dashboard'), end: true, icon: NAV_ICONS.dashboard },

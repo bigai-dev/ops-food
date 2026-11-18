@@ -2,7 +2,7 @@
 // FoodOps — Malaysian F&B Data Model
 // ==========================================
 
-export const SST_RATE = 0.08
+export const SST_RATE = 0.06
 
 export const BUSINESS_INFO = {
   name: { zh: '好味轩', en: 'HaoWei Restaurant', bm: 'Restoran HaoWei' },
@@ -159,71 +159,69 @@ const today = new Date().toISOString().slice(0, 10)
 // Helper to build an order entry quickly
 const _o = (id, items, opts) => {
   const subtotal = items.reduce((s, i) => s + i.subtotal, 0)
-  const sst = +(subtotal * 0.08).toFixed(2)
+  const sst = +(subtotal * SST_RATE).toFixed(2)
   return { id, items, subtotal, sst, total: +(subtotal + sst).toFixed(2), cogs: +(items.reduce((s, i) => s + (MENU.find(m => m.id === i.menuId)?.costPerServing || 4) * i.qty, 0)).toFixed(2), status: 'served', ...opts }
 }
 const _i = (menuIdx, qty) => {
   const m = MENU[menuIdx]
   return { name: m.name, menuId: m.id, qty, unitPrice: m.price, subtotal: m.price * qty }
 }
-const pm = ['cash', 'duitnow', 'tng', 'grabpay', 'fpx', 'card']
-const ot = ['dine-in', 'takeaway', 'delivery']
 
 export const DEFAULT_ORDERS = [
   // Morning rush 11-12 (22 orders over multiple days)
-  _o(85, [_i(0, 3), _i(7, 2)], { orderType: 'dine-in', tableId: 1, paymentMethod: 'cash', time: '11:10', date: `${today}T03:10:00.000Z`, timestamp: Date.now() - 86400000 * 6 }),
-  _o(84, [_i(3, 2)], { orderType: 'dine-in', tableId: 3, paymentMethod: 'duitnow', time: '11:25', date: `${today}T03:25:00.000Z`, timestamp: Date.now() - 86400000 * 6 }),
-  _o(83, [_i(0, 2), _i(5, 1)], { orderType: 'takeaway', tableId: null, paymentMethod: 'tng', time: '11:40', date: `${today}T03:40:00.000Z`, timestamp: Date.now() - 86400000 * 5 }),
-  _o(82, [_i(6, 2)], { orderType: 'dine-in', tableId: 5, paymentMethod: 'cash', time: '11:50', date: `${today}T03:50:00.000Z`, timestamp: Date.now() - 86400000 * 5 }),
+  _o(41, [_i(0, 3), _i(7, 2)], { orderType: 'dine-in', tableId: 1, paymentMethod: 'cash', time: '11:10', date: `${today}T03:10:00.000Z`, timestamp: Date.now() - 86400000 * 6 }),
+  _o(42, [_i(3, 2)], { orderType: 'dine-in', tableId: 3, paymentMethod: 'duitnow', time: '11:25', date: `${today}T03:25:00.000Z`, timestamp: Date.now() - 86400000 * 6 }),
+  _o(43, [_i(0, 2), _i(5, 1)], { orderType: 'takeaway', tableId: null, paymentMethod: 'tng', time: '11:40', date: `${today}T03:40:00.000Z`, timestamp: Date.now() - 86400000 * 5 }),
+  _o(44, [_i(6, 2)], { orderType: 'dine-in', tableId: 5, paymentMethod: 'cash', time: '11:50', date: `${today}T03:50:00.000Z`, timestamp: Date.now() - 86400000 * 5 }),
   // Lunch peak 12-1 (58 orders concept — show 15 recent)
-  _o(81, [_i(0, 4), _i(3, 2)], { orderType: 'dine-in', tableId: 2, paymentMethod: 'duitnow', time: '12:05', date: `${today}T04:05:00.000Z`, timestamp: Date.now() - 86400000 * 4 }),
-  _o(80, [_i(1, 3), _i(7, 3)], { orderType: 'dine-in', tableId: 4, paymentMethod: 'grabpay', time: '12:10', date: `${today}T04:10:00.000Z`, timestamp: Date.now() - 86400000 * 4 }),
-  _o(79, [_i(2, 3), _i(4, 2)], { orderType: 'takeaway', tableId: null, paymentMethod: 'cash', time: '12:15', date: `${today}T04:15:00.000Z`, timestamp: Date.now() - 86400000 * 4 }),
-  _o(78, [_i(5, 3)], { orderType: 'dine-in', tableId: 6, paymentMethod: 'tng', time: '12:20', date: `${today}T04:20:00.000Z`, timestamp: Date.now() - 86400000 * 3 }),
-  _o(77, [_i(0, 2), _i(6, 1)], { orderType: 'dine-in', tableId: 7, paymentMethod: 'fpx', time: '12:25', date: `${today}T04:25:00.000Z`, timestamp: Date.now() - 86400000 * 3 }),
-  _o(76, [_i(6, 3), _i(1, 2)], { orderType: 'dine-in', tableId: 8, paymentMethod: 'card', time: '12:30', date: `${today}T04:30:00.000Z`, timestamp: Date.now() - 86400000 * 3 }),
-  _o(75, [_i(7, 5)], { orderType: 'delivery', tableId: null, paymentMethod: 'duitnow', time: '12:35', date: `${today}T04:35:00.000Z`, timestamp: Date.now() - 86400000 * 3 }),
-  _o(74, [_i(0, 3), _i(2, 2)], { orderType: 'dine-in', tableId: 9, paymentMethod: 'cash', time: '12:40', date: `${today}T04:40:00.000Z`, timestamp: Date.now() - 86400000 * 2 }),
-  _o(73, [_i(3, 3), _i(5, 2)], { orderType: 'dine-in', tableId: 1, paymentMethod: 'grabpay', time: '12:45', date: `${today}T04:45:00.000Z`, timestamp: Date.now() - 86400000 * 2 }),
-  _o(72, [_i(4, 4)], { orderType: 'takeaway', tableId: null, paymentMethod: 'tng', time: '12:50', date: `${today}T04:50:00.000Z`, timestamp: Date.now() - 86400000 * 2 }),
-  _o(71, [_i(1, 2), _i(6, 2)], { orderType: 'dine-in', tableId: 3, paymentMethod: 'duitnow', time: '12:55', date: `${today}T04:55:00.000Z`, timestamp: Date.now() - 86400000 * 2 }),
+  _o(45, [_i(0, 4), _i(3, 2)], { orderType: 'dine-in', tableId: 2, paymentMethod: 'duitnow', time: '12:05', date: `${today}T04:05:00.000Z`, timestamp: Date.now() - 86400000 * 4 }),
+  _o(46, [_i(1, 3), _i(7, 3)], { orderType: 'dine-in', tableId: 4, paymentMethod: 'grabpay', time: '12:10', date: `${today}T04:10:00.000Z`, timestamp: Date.now() - 86400000 * 4 }),
+  _o(47, [_i(2, 3), _i(4, 2)], { orderType: 'takeaway', tableId: null, paymentMethod: 'cash', time: '12:15', date: `${today}T04:15:00.000Z`, timestamp: Date.now() - 86400000 * 4 }),
+  _o(48, [_i(5, 3)], { orderType: 'dine-in', tableId: 6, paymentMethod: 'tng', time: '12:20', date: `${today}T04:20:00.000Z`, timestamp: Date.now() - 86400000 * 3 }),
+  _o(49, [_i(0, 2), _i(6, 1)], { orderType: 'dine-in', tableId: 7, paymentMethod: 'fpx', time: '12:25', date: `${today}T04:25:00.000Z`, timestamp: Date.now() - 86400000 * 3 }),
+  _o(50, [_i(6, 3), _i(1, 2)], { orderType: 'dine-in', tableId: 8, paymentMethod: 'card', time: '12:30', date: `${today}T04:30:00.000Z`, timestamp: Date.now() - 86400000 * 3 }),
+  _o(51, [_i(7, 5)], { orderType: 'delivery', tableId: null, paymentMethod: 'duitnow', time: '12:35', date: `${today}T04:35:00.000Z`, timestamp: Date.now() - 86400000 * 3 }),
+  _o(52, [_i(0, 3), _i(2, 2)], { orderType: 'dine-in', tableId: 9, paymentMethod: 'cash', time: '12:40', date: `${today}T04:40:00.000Z`, timestamp: Date.now() - 86400000 * 2 }),
+  _o(53, [_i(3, 3), _i(5, 2)], { orderType: 'dine-in', tableId: 1, paymentMethod: 'grabpay', time: '12:45', date: `${today}T04:45:00.000Z`, timestamp: Date.now() - 86400000 * 2 }),
+  _o(54, [_i(4, 4)], { orderType: 'takeaway', tableId: null, paymentMethod: 'tng', time: '12:50', date: `${today}T04:50:00.000Z`, timestamp: Date.now() - 86400000 * 2 }),
+  _o(55, [_i(1, 2), _i(6, 2)], { orderType: 'dine-in', tableId: 3, paymentMethod: 'duitnow', time: '12:55', date: `${today}T04:55:00.000Z`, timestamp: Date.now() - 86400000 * 2 }),
   // Afternoon 1-2
-  _o(70, [_i(0, 2)], { orderType: 'dine-in', tableId: 2, paymentMethod: 'cash', time: '13:05', date: `${today}T05:05:00.000Z`, timestamp: Date.now() - 86400000 * 2 }),
-  _o(69, [_i(2, 4), _i(7, 2)], { orderType: 'takeaway', tableId: null, paymentMethod: 'fpx', time: '13:15', date: `${today}T05:15:00.000Z`, timestamp: Date.now() - 86400000 * 1.5 }),
-  _o(68, [_i(6, 2), _i(0, 1)], { orderType: 'dine-in', tableId: 5, paymentMethod: 'card', time: '13:30', date: `${today}T05:30:00.000Z`, timestamp: Date.now() - 86400000 * 1.5 }),
-  _o(67, [_i(5, 2), _i(3, 2)], { orderType: 'dine-in', tableId: 4, paymentMethod: 'duitnow', time: '13:45', date: `${today}T05:45:00.000Z`, timestamp: Date.now() - 86400000 * 1 }),
+  _o(56, [_i(0, 2)], { orderType: 'dine-in', tableId: 2, paymentMethod: 'cash', time: '13:05', date: `${today}T05:05:00.000Z`, timestamp: Date.now() - 86400000 * 2 }),
+  _o(57, [_i(2, 4), _i(7, 2)], { orderType: 'takeaway', tableId: null, paymentMethod: 'fpx', time: '13:15', date: `${today}T05:15:00.000Z`, timestamp: Date.now() - 86400000 * 1.5 }),
+  _o(58, [_i(6, 2), _i(0, 1)], { orderType: 'dine-in', tableId: 5, paymentMethod: 'card', time: '13:30', date: `${today}T05:30:00.000Z`, timestamp: Date.now() - 86400000 * 1.5 }),
+  _o(59, [_i(5, 2), _i(3, 2)], { orderType: 'dine-in', tableId: 4, paymentMethod: 'duitnow', time: '13:45', date: `${today}T05:45:00.000Z`, timestamp: Date.now() - 86400000 * 1 }),
   // Tea time 2-3
-  _o(66, [_i(7, 3)], { orderType: 'takeaway', tableId: null, paymentMethod: 'tng', time: '14:15', date: `${today}T06:15:00.000Z`, timestamp: Date.now() - 86400000 * 1 }),
-  _o(65, [_i(4, 2), _i(0, 1)], { orderType: 'dine-in', tableId: 6, paymentMethod: 'cash', time: '14:45', date: `${today}T06:45:00.000Z`, timestamp: Date.now() - 86400000 * 1 }),
+  _o(60, [_i(7, 3)], { orderType: 'takeaway', tableId: null, paymentMethod: 'tng', time: '14:15', date: `${today}T06:15:00.000Z`, timestamp: Date.now() - 86400000 * 1 }),
+  _o(61, [_i(4, 2), _i(0, 1)], { orderType: 'dine-in', tableId: 6, paymentMethod: 'cash', time: '14:45', date: `${today}T06:45:00.000Z`, timestamp: Date.now() - 86400000 * 1 }),
   // Evening rush 5-6
-  _o(64, [_i(0, 3), _i(1, 2)], { orderType: 'dine-in', tableId: 1, paymentMethod: 'grabpay', time: '17:10', date: `${today}T09:10:00.000Z`, timestamp: Date.now() - 86400000 * 1 }),
+  _o(62, [_i(0, 3), _i(1, 2)], { orderType: 'dine-in', tableId: 1, paymentMethod: 'grabpay', time: '17:10', date: `${today}T09:10:00.000Z`, timestamp: Date.now() - 86400000 * 1 }),
   _o(63, [_i(6, 3)], { orderType: 'dine-in', tableId: 7, paymentMethod: 'cash', time: '17:25', date: `${today}T09:25:00.000Z`, timestamp: Date.now() - 86400000 * 0.8 }),
-  _o(62, [_i(2, 3), _i(5, 2)], { orderType: 'takeaway', tableId: null, paymentMethod: 'duitnow', time: '17:40', date: `${today}T09:40:00.000Z`, timestamp: Date.now() - 86400000 * 0.8 }),
-  _o(61, [_i(3, 2), _i(7, 3)], { orderType: 'delivery', tableId: null, paymentMethod: 'tng', time: '17:55', date: `${today}T09:55:00.000Z`, timestamp: Date.now() - 86400000 * 0.8 }),
+  _o(64, [_i(2, 3), _i(5, 2)], { orderType: 'takeaway', tableId: null, paymentMethod: 'duitnow', time: '17:40', date: `${today}T09:40:00.000Z`, timestamp: Date.now() - 86400000 * 0.8 }),
+  _o(65, [_i(3, 2), _i(7, 3)], { orderType: 'delivery', tableId: null, paymentMethod: 'tng', time: '17:55', date: `${today}T09:55:00.000Z`, timestamp: Date.now() - 86400000 * 0.8 }),
   // Dinner peak 6-7 (biggest rush)
-  _o(60, [_i(0, 4), _i(6, 2)], { orderType: 'dine-in', tableId: 2, paymentMethod: 'duitnow', time: '18:00', date: `${today}T10:00:00.000Z`, timestamp: Date.now() - 3600000 * 10 }),
-  _o(59, [_i(1, 3), _i(2, 2)], { orderType: 'dine-in', tableId: 3, paymentMethod: 'card', time: '18:05', date: `${today}T10:05:00.000Z`, timestamp: Date.now() - 3600000 * 9.5 }),
-  _o(58, [_i(5, 4)], { orderType: 'dine-in', tableId: 8, paymentMethod: 'cash', time: '18:10', date: `${today}T10:10:00.000Z`, timestamp: Date.now() - 3600000 * 9 }),
-  _o(57, [_i(7, 4), _i(4, 2)], { orderType: 'takeaway', tableId: null, paymentMethod: 'grabpay', time: '18:15', date: `${today}T10:15:00.000Z`, timestamp: Date.now() - 3600000 * 8.5 }),
-  _o(56, [_i(0, 2), _i(3, 3)], { orderType: 'dine-in', tableId: 9, paymentMethod: 'fpx', time: '18:20', date: `${today}T10:20:00.000Z`, timestamp: Date.now() - 3600000 * 8 }),
-  _o(55, [_i(6, 2), _i(1, 1)], { orderType: 'dine-in', tableId: 10, paymentMethod: 'tng', time: '18:25', date: `${today}T10:25:00.000Z`, timestamp: Date.now() - 3600000 * 7.5 }),
-  _o(54, [_i(2, 3), _i(0, 2)], { orderType: 'dine-in', tableId: 4, paymentMethod: 'duitnow', time: '18:30', date: `${today}T10:30:00.000Z`, timestamp: Date.now() - 3600000 * 7 }),
-  _o(53, [_i(5, 3), _i(7, 2)], { orderType: 'delivery', tableId: null, paymentMethod: 'cash', time: '18:35', date: `${today}T10:35:00.000Z`, timestamp: Date.now() - 3600000 * 6.5 }),
-  _o(52, [_i(3, 4)], { orderType: 'dine-in', tableId: 5, paymentMethod: 'grabpay', time: '18:40', date: `${today}T10:40:00.000Z`, timestamp: Date.now() - 3600000 * 6 }),
-  _o(51, [_i(0, 3), _i(6, 1)], { orderType: 'dine-in', tableId: 1, paymentMethod: 'card', time: '18:45', date: `${today}T10:45:00.000Z`, timestamp: Date.now() - 3600000 * 5.5 }),
+  _o(66, [_i(0, 4), _i(6, 2)], { orderType: 'dine-in', tableId: 2, paymentMethod: 'duitnow', time: '18:00', date: `${today}T10:00:00.000Z`, timestamp: Date.now() - 3600000 * 10 }),
+  _o(67, [_i(1, 3), _i(2, 2)], { orderType: 'dine-in', tableId: 3, paymentMethod: 'card', time: '18:05', date: `${today}T10:05:00.000Z`, timestamp: Date.now() - 3600000 * 9.5 }),
+  _o(68, [_i(5, 4)], { orderType: 'dine-in', tableId: 8, paymentMethod: 'cash', time: '18:10', date: `${today}T10:10:00.000Z`, timestamp: Date.now() - 3600000 * 9 }),
+  _o(69, [_i(7, 4), _i(4, 2)], { orderType: 'takeaway', tableId: null, paymentMethod: 'grabpay', time: '18:15', date: `${today}T10:15:00.000Z`, timestamp: Date.now() - 3600000 * 8.5 }),
+  _o(70, [_i(0, 2), _i(3, 3)], { orderType: 'dine-in', tableId: 9, paymentMethod: 'fpx', time: '18:20', date: `${today}T10:20:00.000Z`, timestamp: Date.now() - 3600000 * 8 }),
+  _o(71, [_i(6, 2), _i(1, 1)], { orderType: 'dine-in', tableId: 10, paymentMethod: 'tng', time: '18:25', date: `${today}T10:25:00.000Z`, timestamp: Date.now() - 3600000 * 7.5 }),
+  _o(72, [_i(2, 3), _i(0, 2)], { orderType: 'dine-in', tableId: 4, paymentMethod: 'duitnow', time: '18:30', date: `${today}T10:30:00.000Z`, timestamp: Date.now() - 3600000 * 7 }),
+  _o(73, [_i(5, 3), _i(7, 2)], { orderType: 'delivery', tableId: null, paymentMethod: 'cash', time: '18:35', date: `${today}T10:35:00.000Z`, timestamp: Date.now() - 3600000 * 6.5 }),
+  _o(74, [_i(3, 4)], { orderType: 'dine-in', tableId: 5, paymentMethod: 'grabpay', time: '18:40', date: `${today}T10:40:00.000Z`, timestamp: Date.now() - 3600000 * 6 }),
+  _o(75, [_i(0, 3), _i(6, 1)], { orderType: 'dine-in', tableId: 1, paymentMethod: 'card', time: '18:45', date: `${today}T10:45:00.000Z`, timestamp: Date.now() - 3600000 * 5.5 }),
   // 7-8pm
-  _o(50, [_i(1, 4), _i(5, 2)], { orderType: 'dine-in', tableId: 6, paymentMethod: 'duitnow', time: '19:00', date: `${today}T11:00:00.000Z`, timestamp: Date.now() - 3600000 * 5 }),
-  _o(49, [_i(0, 2), _i(4, 3)], { orderType: 'takeaway', tableId: null, paymentMethod: 'tng', time: '19:10', date: `${today}T11:10:00.000Z`, timestamp: Date.now() - 3600000 * 4.5 }),
-  _o(48, [_i(6, 2), _i(7, 3)], { orderType: 'dine-in', tableId: 7, paymentMethod: 'cash', time: '19:20', date: `${today}T11:20:00.000Z`, timestamp: Date.now() - 3600000 * 4 }),
-  _o(47, [_i(2, 2), _i(3, 2)], { orderType: 'dine-in', tableId: 2, paymentMethod: 'fpx', time: '19:30', date: `${today}T11:30:00.000Z`, timestamp: Date.now() - 3600000 * 3.5 }),
-  _o(46, [_i(0, 5)], { orderType: 'dine-in', tableId: 8, paymentMethod: 'grabpay', time: '19:40', date: `${today}T11:40:00.000Z`, timestamp: Date.now() - 3600000 * 3 }),
-  _o(45, [_i(5, 3), _i(1, 2)], { orderType: 'dine-in', tableId: 3, paymentMethod: 'duitnow', time: '19:50', date: `${today}T11:50:00.000Z`, timestamp: Date.now() - 3600000 * 2.5 }),
+  _o(76, [_i(1, 4), _i(5, 2)], { orderType: 'dine-in', tableId: 6, paymentMethod: 'duitnow', time: '19:00', date: `${today}T11:00:00.000Z`, timestamp: Date.now() - 3600000 * 5 }),
+  _o(77, [_i(0, 2), _i(4, 3)], { orderType: 'takeaway', tableId: null, paymentMethod: 'tng', time: '19:10', date: `${today}T11:10:00.000Z`, timestamp: Date.now() - 3600000 * 4.5 }),
+  _o(78, [_i(6, 2), _i(7, 3)], { orderType: 'dine-in', tableId: 7, paymentMethod: 'cash', time: '19:20', date: `${today}T11:20:00.000Z`, timestamp: Date.now() - 3600000 * 4 }),
+  _o(79, [_i(2, 2), _i(3, 2)], { orderType: 'dine-in', tableId: 2, paymentMethod: 'fpx', time: '19:30', date: `${today}T11:30:00.000Z`, timestamp: Date.now() - 3600000 * 3.5 }),
+  _o(80, [_i(0, 5)], { orderType: 'dine-in', tableId: 8, paymentMethod: 'grabpay', time: '19:40', date: `${today}T11:40:00.000Z`, timestamp: Date.now() - 3600000 * 3 }),
+  _o(81, [_i(5, 3), _i(1, 2)], { orderType: 'dine-in', tableId: 3, paymentMethod: 'duitnow', time: '19:50', date: `${today}T11:50:00.000Z`, timestamp: Date.now() - 3600000 * 2.5 }),
   // 8-9pm (closing)
-  _o(44, [_i(7, 4)], { orderType: 'takeaway', tableId: null, paymentMethod: 'cash', time: '20:10', date: `${today}T12:10:00.000Z`, timestamp: Date.now() - 3600000 * 2 }),
-  _o(43, [_i(6, 2)], { orderType: 'dine-in', tableId: 9, paymentMethod: 'card', time: '20:25', date: `${today}T12:25:00.000Z`, timestamp: Date.now() - 3600000 * 1.5 }),
-  _o(42, [_i(0, 2), _i(2, 1)], { orderType: 'dine-in', tableId: 10, paymentMethod: 'tng', time: '20:40', date: `${today}T12:40:00.000Z`, timestamp: Date.now() - 3600000 * 1 }),
-  _o(41, [_i(3, 2), _i(4, 1)], { orderType: 'delivery', tableId: null, paymentMethod: 'duitnow', time: '20:55', date: `${today}T12:55:00.000Z`, timestamp: Date.now() - 3600000 * 0.5 }),
-]
+  _o(82, [_i(7, 4)], { orderType: 'takeaway', tableId: null, paymentMethod: 'cash', time: '20:10', date: `${today}T12:10:00.000Z`, timestamp: Date.now() - 3600000 * 2 }),
+  _o(83, [_i(6, 2)], { orderType: 'dine-in', tableId: 9, paymentMethod: 'card', time: '20:25', date: `${today}T12:25:00.000Z`, timestamp: Date.now() - 3600000 * 1.5 }),
+  _o(84, [_i(0, 2), _i(2, 1)], { orderType: 'dine-in', tableId: 10, paymentMethod: 'tng', time: '20:40', date: `${today}T12:40:00.000Z`, timestamp: Date.now() - 3600000 * 1 }),
+  _o(85, [_i(3, 2), _i(4, 1)], { orderType: 'delivery', tableId: null, paymentMethod: 'duitnow', time: '20:55', date: `${today}T12:55:00.000Z`, timestamp: Date.now() - 3600000 * 0.5 }),
+].reverse() // listed oldest → newest above; stored newest first, like orders placed in the app
 
 // ==========================================
 // Sales Rankings (default demo data)
@@ -237,15 +235,16 @@ export const DEFAULT_SALES_RANKING = [
   { name: '虾面', count: 84 },
 ]
 
+// start = opening hour of the slot in 24h time (closed 3-5pm between lunch and dinner)
 export const DEFAULT_TIME_SLOTS = [
-  { label: '11-12', count: 22 },
-  { label: '12-1', count: 58 },
-  { label: '1-2', count: 35 },
-  { label: '2-3', count: 15 },
-  { label: '5-6', count: 28 },
-  { label: '6-7', count: 65 },
-  { label: '7-8', count: 48 },
-  { label: '8-9', count: 12 },
+  { label: '11-12', start: 11, count: 22 },
+  { label: '12-1', start: 12, count: 58 },
+  { label: '1-2', start: 13, count: 35 },
+  { label: '2-3', start: 14, count: 15 },
+  { label: '5-6', start: 17, count: 28 },
+  { label: '6-7', start: 18, count: 65 },
+  { label: '7-8', start: 19, count: 48 },
+  { label: '8-9', start: 20, count: 12 },
 ]
 
 // ==========================================

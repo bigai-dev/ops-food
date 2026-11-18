@@ -170,7 +170,36 @@ function TableCardInner({ table, isEditMode, isOccupied, order, onCardClick, onF
 // ==========================================
 // Floor Plan — Draggable Table on Canvas
 // ==========================================
-function FloorPlanTable({ table, isEditMode, isOccupied, order, onCardClick, onFree, onRemove, onSeatsChange, onPositionChange, t, locale }) {
+
+// Smallest table card height on the floor plan — used to pull tables saved outside the floor back into view
+const MIN_TABLE_HEIGHT = 130
+
+// Where a dragged table lands for this pointer position, kept inside the floor so it can't be dropped out of sight
+function floorPosition(e, el, offset) {
+  const floor = el.parentElement
+  const rect = floor.getBoundingClientRect()
+  const x = e.clientX - rect.left - floor.clientLeft - offset.x
+  const y = e.clientY - rect.top - floor.clientTop - offset.y
+  return {
+    x: Math.max(0, Math.min(floor.clientWidth - el.offsetWidth, x)),
+    y: Math.max(0, Math.min(floor.clientHeight - el.offsetHeight, y)),
+  }
+}
+
+// First spot on the default layout grid that fits on the floor and doesn't overlap another table
+function findFreeSpot(tableConfig, floorSize) {
+  const width = floorSize?.width ?? 900
+  const height = floorSize?.height ?? 500
+  for (let y = 60; y + 170 <= height; y += 200) {
+    for (let x = 60; x + 150 <= width; x += 170) {
+      const taken = tableConfig.some(t => Math.abs((t.x || 0) - x) < 150 && Math.abs((t.y || 0) - y) < 170)
+      if (!taken) return { x, y }
+    }
+  }
+  return null // floor is full — the store falls back to its default position
+}
+
+function FloorPlanTable({ table, floorSize, isEditMode, isOccupied, order, onCardClick, onFree, onRemove, onSeatsChange, onPositionChange, t }) {
   const [dragging, setDragging] = useState(false)
   const dragOffset = useRef({ x: 0, y: 0 })
   const elRef = useRef(null)
@@ -187,10 +216,7 @@ function FloorPlanTable({ table, isEditMode, isOccupied, order, onCardClick, onF
 
   const handlePointerMove = useCallback((e) => {
     if (!dragging || !elRef.current) return
-    const parent = elRef.current.parentElement
-    const parentRect = parent.getBoundingClientRect()
-    const x = Math.max(0, Math.min(parentRect.width - 160, e.clientX - parentRect.left - dragOffset.current.x))
-    const y = Math.max(0, Math.min(parentRect.height - 160, e.clientY - parentRect.top - dragOffset.current.y))
+    const { x, y } = floorPosition(e, elRef.current, dragOffset.current)
     elRef.current.style.left = x + 'px'
     elRef.current.style.top = y + 'px'
   }, [dragging])
@@ -199,14 +225,13 @@ function FloorPlanTable({ table, isEditMode, isOccupied, order, onCardClick, onF
     if (!dragging) return
     setDragging(false)
     elRef.current.releasePointerCapture(e.pointerId)
-    const parent = elRef.current.parentElement
-    const parentRect = parent.getBoundingClientRect()
-    const x = Math.max(0, e.clientX - parentRect.left - dragOffset.current.x)
-    const y = Math.max(0, e.clientY - parentRect.top - dragOffset.current.y)
+    const { x, y } = floorPosition(e, elRef.current, dragOffset.current)
     onPositionChange(x, y)
   }, [dragging, onPositionChange])
 
   const tableWidth = table.seats <= 2 ? 100 : table.seats <= 4 ? 110 : table.seats <= 6 ? 130 : 150
+  const left = floorSize ? Math.max(0, Math.min(table.x || 0, floorSize.width - tableWidth)) : (table.x || 0)
+  const top = floorSize ? Math.max(0, Math.min(table.y || 0, floorSize.height - MIN_TABLE_HEIGHT)) : (table.y || 0)
 
   return (
     <div
@@ -214,8 +239,8 @@ function FloorPlanTable({ table, isEditMode, isOccupied, order, onCardClick, onF
       className={`floor-plan__table ${dragging ? 'floor-plan__table--dragging' : ''} ${isEditMode ? 'floor-plan__table--editable' : ''} ${isOccupied ? 'floor-plan__table--occupied' : ''}`}
       style={{
         position: 'absolute',
-        left: table.x || 0,
-        top: table.y || 0,
+        left,
+        top,
         width: tableWidth,
         touchAction: 'none',
       }}
@@ -292,8 +317,19 @@ export function Tables() {
   const [isEditMode, setIsEditMode] = useState(false)
   const [viewMode, setViewMode] = useState('floor') // 'grid' or 'floor'
   const [selectedOrder, setSelectedOrder] = useState(null)
+  const floorRef = useRef(null)
+  const [floorSize, setFloorSize] = useState(null)
 
   useEffect(() => { initTableOrder() }, [initTableOrder])
+
+  // Track the floor plan size so tables stay inside it and new ones land in a free spot
+  useEffect(() => {
+    const floor = floorRef.current
+    if (!floor) return
+    const observer = new ResizeObserver(() => setFloorSize({ width: floor.clientWidth, height: floor.clientHeight }))
+    observer.observe(floor)
+    return () => observer.disconnect()
+  }, [viewMode])
 
   const displayOrder = tableOrder.length === tableConfig.length
     ? tableOrder
@@ -345,7 +381,7 @@ export function Tables() {
               }}
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="inline mr-1"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/></svg>
-              Grid
+              {t('tables.gridView')}
             </button>
             <button
               onClick={() => setViewMode('floor')}
@@ -357,7 +393,7 @@ export function Tables() {
               }}
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="inline mr-1"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
-              Floor
+              {t('tables.floorView')}
             </button>
           </div>
 
@@ -373,7 +409,7 @@ export function Tables() {
             )}
           </Button>
           {isEditMode && (
-            <Button onClick={() => addTable(4)} className="gap-1">
+            <Button onClick={() => addTable(4, findFreeSpot(tableConfig, floorSize))} className="gap-1">
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
               {t('tables.addTable')}
             </Button>
@@ -461,7 +497,7 @@ export function Tables() {
 
       {/* === FLOOR PLAN VIEW === */}
       {viewMode === 'floor' && (
-        <div className="floor-plan__container">
+        <div className="floor-plan__container" ref={floorRef}>
           {/* Grid background */}
           <svg className="floor-plan__grid-bg" width="100%" height="100%">
             <defs>
@@ -492,6 +528,7 @@ export function Tables() {
               <FloorPlanTable
                 key={table.id}
                 table={table}
+                floorSize={floorSize}
                 isEditMode={isEditMode}
                 isOccupied={isOccupied}
                 order={order}
@@ -501,7 +538,6 @@ export function Tables() {
                 onSeatsChange={(seats) => updateTableSeats(table.id, seats)}
                 onPositionChange={(x, y) => updateTablePosition(table.id, x, y)}
                 t={t}
-                locale={locale}
               />
             )
           })}

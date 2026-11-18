@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
@@ -6,6 +7,26 @@ import { useFoodOpsStore } from '@/store'
 import { STAFF, SHIFTS, DAYS, staffName, staffRole } from '@/data'
 import { useI18n } from '@/i18n/I18nContext'
 import { useDarkMode } from '@/lib/hooks/use-dark-mode'
+
+// Number box that lets the field be cleared while typing, and only saves whole numbers within min–max
+function NumberSetting({ value, min, max, onChange, className }) {
+  const [draft, setDraft] = useState(null) // null = not editing, show the saved value
+  const save = (text) => {
+    const n = Number(text)
+    if (text !== '' && Number.isInteger(n)) onChange(Math.min(max, Math.max(min, n)))
+  }
+  return (
+    <Input type="number" min={min} max={max} className={className}
+      value={draft ?? value}
+      onChange={e => {
+        setDraft(e.target.value)
+        const n = Number(e.target.value)
+        if (e.target.value !== '' && Number.isInteger(n) && n >= min && n <= max) onChange(n)
+      }}
+      onBlur={() => { if (draft !== null) save(draft); setDraft(null) }}
+    />
+  )
+}
 
 const SHIFT_STYLE = {
   morning: { bg: '#DBEAFE', text: '#1E40AF', border: '#93C5FD', darkBg: 'rgba(59,130,246,0.25)', darkText: '#93C5FD' },
@@ -64,20 +85,20 @@ export function Settings() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <Label>{t('settings.minCooks')}</Label>
-              <Input type="number" min={0} max={3} value={scheduleConfig.minCooksPerShift}
-                onChange={e => updateScheduleConfig({ minCooksPerShift: Number(e.target.value) || 0 })} className="mt-1" />
+              <NumberSetting min={0} max={3} value={scheduleConfig.minCooksPerShift}
+                onChange={n => updateScheduleConfig({ minCooksPerShift: n })} className="mt-1" />
               <p className="text-xs text-muted-foreground mt-1">{t('settings.minCooksHint')}</p>
             </div>
             <div>
               <Label>{t('settings.weekdayStaff')}</Label>
-              <Input type="number" min={1} max={5} value={scheduleConfig.minStaffPerShift}
-                onChange={e => updateScheduleConfig({ minStaffPerShift: Number(e.target.value) || 1 })} className="mt-1" />
+              <NumberSetting min={1} max={5} value={scheduleConfig.minStaffPerShift}
+                onChange={n => updateScheduleConfig({ minStaffPerShift: n })} className="mt-1" />
               <p className="text-xs text-muted-foreground mt-1">{t('settings.weekdayHint')}</p>
             </div>
             <div>
               <Label>{t('settings.weekendStaff')}</Label>
-              <Input type="number" min={1} max={5} value={scheduleConfig.weekendStaffPerShift}
-                onChange={e => updateScheduleConfig({ weekendStaffPerShift: Number(e.target.value) || 1 })} className="mt-1" />
+              <NumberSetting min={1} max={5} value={scheduleConfig.weekendStaffPerShift}
+                onChange={n => updateScheduleConfig({ weekendStaffPerShift: n })} className="mt-1" />
               <p className="text-xs text-muted-foreground mt-1">{t('settings.weekendHint')}</p>
             </div>
           </div>
@@ -103,18 +124,18 @@ export function Settings() {
                     <div className="grid grid-cols-3 gap-3">
                       <div>
                         <Label className="text-xs">{t('settings.maxShifts')}</Label>
-                        <Input type="number" min={1} max={7} value={s.maxShiftsPerWeek}
-                          onChange={e => updateStaffSetting(si, { maxShiftsPerWeek: Number(e.target.value) || 1 })} className="mt-1" />
+                        <NumberSetting min={1} max={7} value={s.maxShiftsPerWeek}
+                          onChange={n => updateStaffSetting(si, { maxShiftsPerWeek: n })} className="mt-1" />
                       </div>
                       <div>
                         <Label className="text-xs">{t('settings.minRest')}</Label>
-                        <Input type="number" min={0} max={4} value={s.minRestDays}
-                          onChange={e => updateStaffSetting(si, { minRestDays: Number(e.target.value) || 0 })} className="mt-1" />
+                        <NumberSetting min={0} max={4} value={s.minRestDays}
+                          onChange={n => updateStaffSetting(si, { minRestDays: n })} className="mt-1" />
                       </div>
                       <div>
                         <Label className="text-xs">{t('settings.maxConsecutive')}</Label>
-                        <Input type="number" min={1} max={7} value={s.maxConsecutiveDays}
-                          onChange={e => updateStaffSetting(si, { maxConsecutiveDays: Number(e.target.value) || 1 })} className="mt-1" />
+                        <NumberSetting min={1} max={7} value={s.maxConsecutiveDays}
+                          onChange={n => updateStaffSetting(si, { maxConsecutiveDays: n })} className="mt-1" />
                       </div>
                     </div>
 
@@ -153,7 +174,7 @@ export function Settings() {
                       })}
                     </div>
                     <p className="text-xs text-muted-foreground mt-2">
-                      {t('settings.unavailableHint')}{s.unavailableDays.length === 0 ? t('settings.noFixedRest') : s.unavailableDays.map(d => dayLabel(DAYS[d], locale)).join('、')}
+                      {t('settings.unavailableHint')}{s.unavailableDays.length === 0 ? t('settings.noFixedRest') : s.unavailableDays.map(d => dayLabel(DAYS[d], locale)).join(locale === 'zh' ? '、' : ', ')}
                     </p>
                   </div>
                 </div>

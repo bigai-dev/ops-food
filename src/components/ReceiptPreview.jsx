@@ -1,21 +1,24 @@
 import { useRef } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { BUSINESS_INFO, PAYMENT_METHODS, ORDER_TYPES, DEFAULT_TABLE_CONFIG, menuName } from '@/data'
+import { BUSINESS_INFO, PAYMENT_METHODS, ORDER_TYPES, SST_RATE, menuName } from '@/data'
+import { useFoodOpsStore } from '@/store'
 import { useI18n } from '@/i18n/I18nContext'
 
 export function ReceiptPreview({ order, open, onOpenChange }) {
   const { t, ln, locale } = useI18n()
   const receiptRef = useRef(null)
+  const tableConfig = useFoodOpsStore(s => s.tableConfig)
 
   if (!order) return null
 
   const paymentLabel = PAYMENT_METHODS.find(p => p.id === order.paymentMethod)
   const orderTypeLabel = ORDER_TYPES.find(o => o.id === order.orderType)
-  const table = order.tableId ? DEFAULT_TABLE_CONFIG.find(t => t.id === order.tableId) : null
+  const table = order.tableId ? tableConfig.find(tc => tc.id === order.tableId) : null
 
   const handlePrint = () => {
     const printWindow = window.open('', '_blank', 'width=320,height=600')
+    if (!printWindow) return // pop-up blocked by the browser
     printWindow.document.write(`
       <html><head><title>Receipt #${order.id}</title>
       <style>
@@ -91,10 +94,10 @@ export function ReceiptPreview({ order, open, onOpenChange }) {
             <span>{t('receipt.type')}:</span>
             <span>{orderTypeLabel ? `${orderTypeLabel.icon} ${ln(orderTypeLabel.name)}` : order.orderType}</span>
           </div>
-          {table && (
+          {order.tableId && (
             <div style={{ display: 'flex', justifyContent: 'space-between', padding: '2px 0' }}>
               <span>{t('receipt.table')}:</span>
-              <span>T{table.id} ({table.seats} {t('tables.seats')})</span>
+              <span>T{order.tableId}{table ? ` (${table.seats} ${t('tables.seats')})` : ''}</span>
             </div>
           )}
           <div style={{ display: 'flex', justifyContent: 'space-between', padding: '2px 0' }}>
@@ -120,7 +123,7 @@ export function ReceiptPreview({ order, open, onOpenChange }) {
             <span>RM {order.subtotal.toFixed(2)}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', padding: '2px 0' }}>
-            <span>{t('receipt.sst')}</span>
+            <span>{t('receipt.sst', { rate: SST_RATE * 100 })}</span>
             <span>RM {order.sst.toFixed(2)}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontWeight: 'bold', fontSize: 14 }}>

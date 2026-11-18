@@ -1,12 +1,13 @@
+import { useState, useEffect } from 'react'
 import { useFoodOpsStore } from '@/store'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { KDS_STATUSES, KDS_STATUS_CONFIG, ORDER_TYPES, menuName } from '@/data'
 import { useI18n } from '@/i18n/I18nContext'
 
-function elapsed(timestamp) {
+function elapsed(timestamp, now) {
   if (!timestamp) return ''
-  const diff = Math.floor((Date.now() - timestamp) / 1000)
+  const diff = Math.max(0, Math.floor((now - timestamp) / 1000))
   if (diff < 60) return `${diff}s`
   if (diff < 3600) return `${Math.floor(diff / 60)}m`
   return `${Math.floor(diff / 3600)}h`
@@ -16,6 +17,13 @@ export function Kitchen() {
   const { t, ln, locale } = useI18n()
   const orders = useFoodOpsStore(s => s.orders)
   const advanceOrderStatus = useFoodOpsStore(s => s.advanceOrderStatus)
+
+  // Keep the "time ago" on each ticket ticking while the kitchen screen is open
+  const [now, setNow] = useState(() => Date.now())
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 15000)
+    return () => clearInterval(timer)
+  }, [])
 
   return (
     <div className="page-enter space-y-5">
@@ -96,7 +104,7 @@ export function Kitchen() {
                         {/* Footer */}
                         <div className="flex items-center justify-between text-[10px] text-muted-foreground pt-1">
                           <span>RM {order.total.toFixed(2)}</span>
-                          <span>{elapsed(order.timestamp)} {t('kitchen.ago')}</span>
+                          <span>{elapsed(order.timestamp, now)} {t('kitchen.ago')}</span>
                         </div>
 
                         {/* Action hint */}
