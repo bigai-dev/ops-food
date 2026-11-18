@@ -61,7 +61,7 @@ export function Orders() {
 
     import('canvas-confetti').then(m => m.default({
       particleCount: 80, spread: 60, origin: { y: 0.7 },
-      colors: ['#2563EB', '#10B981', '#F59E0B'],
+      colors: ['#B64E10', '#E99541', '#389469', '#E7BF57'],
     }))
   }
 
@@ -76,15 +76,15 @@ export function Orders() {
               const qty = currentOrder[item.id] || 0
               return (
                 <Card key={item.id} className="card-hover overflow-hidden cursor-default">
-                  <div className="relative flex items-center justify-center" style={{ height: 64, borderRadius: '8px 8px 0 0', background: item.bg, fontSize: 36 }}>
+                  <div className="menu-thumb relative flex items-center justify-center" style={{ '--thumb': item.bg, height: 64, borderRadius: '8px 8px 0 0', fontSize: 36 }}>
                     {item.emoji}
                     {/* Halal badge */}
                     <span
-                      className="absolute top-1.5 right-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full"
-                      style={{
-                        background: item.halal ? '#D1FAE5' : '#FFE4E6',
-                        color: item.halal ? '#065F46' : '#9F1239',
-                      }}
+                      className={`absolute top-1.5 right-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                        item.halal
+                          ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-400/15 dark:text-emerald-300'
+                          : 'bg-rose-100 text-rose-800 dark:bg-rose-400/15 dark:text-rose-300'
+                      }`}
                     >
                       {item.halal ? t('orders.halal') : t('orders.nonHalal')}
                     </span>

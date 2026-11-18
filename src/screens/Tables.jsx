@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useRouter } from 'next/navigation'
 import { DragDropProvider } from '@dnd-kit/react'
 import { useSortable } from '@dnd-kit/react/sortable'
 import { move } from '@dnd-kit/helpers'
@@ -301,7 +301,7 @@ function FloorPlanTable({ table, floorSize, isEditMode, isOccupied, order, onCar
 // ==========================================
 export function Tables() {
   const { t, locale } = useI18n()
-  const navigate = useNavigate()
+  const router = useRouter()
   const tables = useFoodOpsStore(s => s.tables)
   const tableConfig = useFoodOpsStore(s => s.tableConfig) || []
   const tableOrder = useFoodOpsStore(s => s.tableOrder) || []
@@ -353,7 +353,7 @@ export function Tables() {
       const order = orders.find(o => o.id === table.orderId)
       if (order) setSelectedOrder(order)
     } else {
-      navigate('/orders')
+      router.push('/orders')
     }
   }
 

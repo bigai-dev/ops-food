@@ -24,8 +24,8 @@ FoodOps is a single-page demo app that simulates the day-to-day operations of a 
 
 ## Tech Stack
 
-- **Framework:** React 19 + React Router 7
-- **Build tooling:** Vite 8
+- **Framework:** Next.js 16 (App Router) + React 19
+- **Build tooling:** Next.js (Turbopack)
 - **Language:** JavaScript (JSX, ES modules)
 - **Styling:** Tailwind CSS v4 with shadcn/ui (Base Nova style) and `tw-animate-css`
 - **State management:** Zustand 5 with `persist` middleware (localStorage)
@@ -55,15 +55,15 @@ npm install
 npm run dev
 ```
 
-Then open http://localhost:5173 in your browser. Hot reload is on — edit any file and it updates instantly.
+Then open http://localhost:3000 in your browser. Hot reload is on — edit any file and it updates instantly.
 
 Other available commands:
 
 | Command           | What it does                                |
 | ----------------- | ------------------------------------------- |
 | `npm run dev`     | Start the dev server with hot reload        |
-| `npm run build`   | Build an optimized production bundle to `dist/` |
-| `npm run preview` | Serve the built bundle locally              |
+| `npm run build`   | Build an optimized production bundle to `.next/` |
+| `npm start`       | Serve the built bundle locally              |
 | `npm run lint`    | Run ESLint                                  |
 | `npm test`        | Run the store tests in `tests/`             |
 
@@ -71,15 +71,16 @@ This project has no backend and no environment variables — all data lives in y
 
 ## Project Structure
 
-- `index.html` — Vite entry point
-- `vite.config.js` — Vite + Tailwind config and the `@/` path alias
+- `app/` — Next.js routes: `layout.jsx` (page shell + metadata) and one `page.jsx` per screen (`/`, `/orders`, `/kitchen`, `/tables`, `/inventory`, `/schedule`, `/settings`, `/reports`); unknown addresses go back to `/`
+- `next.config.mjs` — Next.js config
+- `postcss.config.mjs` — Tailwind CSS v4 via `@tailwindcss/postcss`
+- `jsconfig.json` — the `@/` path alias (points to `src/`)
 - `components.json` — shadcn/ui configuration
-- `src/main.jsx` — app bootstrap (providers + router)
-- `src/App.jsx` — route wrapper
+- `src/components/AppShell.jsx` — providers (language, tooltips, toasts) + sidebar layout; renders in the browser only, since all data lives in `localStorage`
 - `src/data.js` — demo data: menu, staff, tables, inventory, SST rate
 - `src/store.js` — Zustand store with localStorage persistence
 - `src/index.css` — Tailwind layers, CSS variables, and dark-mode tokens
-- `src/pages/` — one file per route (Dashboard, Orders, Kitchen, Tables, Inventory, Schedule, Reports, Settings)
+- `src/screens/` — the screen components (Dashboard, Orders, Kitchen, Tables, Inventory, Schedule, Reports, Settings) and `index.jsx` with the sidebar menu
 - `src/components/` — layout and feature components, with `ui/` holding shadcn/ui primitives
 - `src/i18n/` — translations and the I18n context
 - `src/lib/` — `utils.js` helper, plus `hooks/` with custom hooks (`use-dark-mode`, `use-chart-theme`, `use-count-up`)

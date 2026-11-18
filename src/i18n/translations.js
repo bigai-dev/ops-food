@@ -210,6 +210,7 @@ export const translations = {
     'common.newCount': '{count} 条新通知',
     'common.darkMode': '切换到暗色模式',
     'common.lightMode': '切换到亮色模式',
+    'common.language': '语言',
     'common.navigation': '导航',
   },
 
@@ -424,6 +425,7 @@ export const translations = {
     'common.newCount': '{count} new',
     'common.darkMode': 'Switch to dark mode',
     'common.lightMode': 'Switch to light mode',
+    'common.language': 'Language',
     'common.navigation': 'Navigation',
   },
 
@@ -638,6 +640,7 @@ export const translations = {
     'common.newCount': '{count} baharu',
     'common.darkMode': 'Tukar ke mod gelap',
     'common.lightMode': 'Tukar ke mod cerah',
+    'common.language': 'Bahasa',
     'common.navigation': 'Navigasi',
   },
 }

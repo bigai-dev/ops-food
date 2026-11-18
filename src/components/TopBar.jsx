@@ -1,14 +1,21 @@
 import { useState, useRef, useEffect } from 'react'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { useDarkMode } from '@/lib/hooks/use-dark-mode'
 import { useI18n } from '@/i18n/I18nContext'
 
 const LOCALES = [
-  { id: 'zh', label: '中' },
-  { id: 'en', label: 'EN' },
-  { id: 'bm', label: 'BM' },
+  { id: 'zh', label: '中', name: '中文', lang: 'zh' },
+  { id: 'en', label: 'EN', name: 'English', lang: 'en' },
+  { id: 'bm', label: 'BM', name: 'Bahasa Melayu', lang: 'ms' },
 ]
+
+// Colours come straight from the theme variables so they follow FoodOps light/dark.
+// Icons stay quiet by default and light up on hover or while their panel is open.
+const ICON_BUTTON =
+  'relative inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg outline-none ' +
+  'text-(--color-muted-foreground) transition-colors duration-150 ' +
+  'hover:bg-(--color-muted) hover:text-(--color-foreground) ' +
+  'aria-expanded:bg-(--color-muted) aria-expanded:text-(--color-foreground) ' +
+  'focus-visible:ring-2 focus-visible:ring-ring/50 [&_svg]:size-4'
 
 function BellIcon() {
   return (
@@ -45,25 +52,26 @@ export function TopBar({ notifications = [], logo }) {
   }, [])
 
   return (
-    <div className="flex items-center gap-2.5 px-6 py-2.5 border-b border-border bg-card">
+    <div className="flex items-center gap-1.5 px-6 py-2.5 border-b border-border bg-card">
       {logo && <div className="flex-1">{logo}</div>}
       {!logo && <div className="flex-1" />}
 
       <div className="relative" ref={notifRef}>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-9 w-9 relative"
+        <button
+          type="button"
+          className={ICON_BUTTON}
           aria-label={`${t('common.notifications')}${notifications.length > 0 ? ` (${t('common.newCount', { count: notifications.length })})` : ''}`}
+          aria-expanded={showNotifications}
           onClick={() => setShowNotifications(!showNotifications)}
         >
           <BellIcon />
           {notifications.length > 0 && (
-            <Badge className="absolute -top-1 -right-1 h-4 min-w-4 px-1 text-[11px] bg-destructive text-destructive-foreground">
+            // Same red as the sidebar badges; the ring cuts it cleanly out of the bell
+            <span className="pointer-events-none absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#EF4444] px-1 text-[10px] font-bold leading-none tabular-nums text-white ring-2 ring-(--color-card)">
               {notifications.length}
-            </Badge>
+            </span>
           )}
-        </Button>
+        </button>
 
         {showNotifications && (
           <div className="absolute right-0 top-full mt-2 w-72 bg-card border border-border rounded-lg shadow-lg z-50 overflow-hidden">
@@ -84,26 +92,36 @@ export function TopBar({ notifications = [], logo }) {
         )}
       </div>
 
-      {/* Language switcher */}
-      <div className="flex items-center border border-border rounded-lg overflow-hidden h-9">
-        {LOCALES.map(loc => (
-          <button
-            key={loc.id}
-            onClick={() => changeLocale(loc.id)}
-            className={`px-2.5 h-full text-xs font-semibold transition-colors ${
-              locale === loc.id
-                ? 'bg-primary text-primary-foreground'
-                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-            }`}
-          >
-            {loc.label}
-          </button>
-        ))}
+      {/* Alerts on the left of the divider, display preferences on the right */}
+      <span aria-hidden="true" className="mx-1.5 h-5 w-px bg-(--color-border)" />
+
+      {/* Language switcher: a recessed track with the current language raised */}
+      <div role="group" aria-label={t('common.language')} className="flex h-9 items-center gap-0.5 rounded-lg bg-muted p-1">
+        {LOCALES.map(loc => {
+          const active = locale === loc.id
+          return (
+            <button
+              key={loc.id}
+              type="button"
+              lang={loc.lang}
+              title={loc.name}
+              aria-pressed={active}
+              onClick={() => changeLocale(loc.id)}
+              className={`flex h-7 min-w-9 items-center justify-center rounded-md px-2 text-xs font-semibold outline-none transition-[color,background-color,box-shadow] duration-150 focus-visible:ring-2 focus-visible:ring-ring/50 ${
+                active
+                  ? 'bg-(--color-card) text-(--color-foreground) shadow-[0_1px_2px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.05)] dark:bg-white/12'
+                  : 'cursor-pointer text-(--color-muted-foreground) hover:text-(--color-foreground)'
+              }`}
+            >
+              {loc.label}
+            </button>
+          )
+        })}
       </div>
 
-      <Button variant="ghost" size="icon" className="h-9 w-9" onClick={toggle} aria-label={isDark ? t('common.lightMode') : t('common.darkMode')}>
+      <button type="button" className={ICON_BUTTON} onClick={toggle} aria-label={isDark ? t('common.lightMode') : t('common.darkMode')}>
         {isDark ? <SunIcon /> : <MoonIcon />}
-      </Button>
+      </button>
     </div>
   )
 }

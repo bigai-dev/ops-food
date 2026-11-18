@@ -5,13 +5,13 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  globalIgnores(['dist', '.next', 'out']),
   {
     files: ['**/*.{js,jsx}'],
     extends: [
       js.configs.recommended,
       reactHooks.configs.flat.recommended,
-      reactRefresh.configs.vite,
+      reactRefresh.configs.next,
     ],
     languageOptions: {
       ecmaVersion: 2020,
@@ -27,12 +27,12 @@ export default defineConfig([
       // Hooks and shadcn/ui style helpers that intentionally live next to their components
       'react-refresh/only-export-components': ['error', {
         allowConstantExport: true,
-        allowExportNames: ['useToast', 'useI18n', 'buttonVariants', 'badgeVariants', 'tabsListVariants'],
+        allowExportNames: ['metadata', 'useToast', 'useI18n', 'buttonVariants', 'badgeVariants', 'tabsListVariants'],
       }],
     },
   },
   {
-    files: ['vite.config.js', 'tests/**/*.js'],
+    files: ['next.config.mjs', 'postcss.config.mjs', 'tests/**/*.js'],
     languageOptions: { globals: globals.node },
   },
 ])

@@ -110,8 +110,8 @@ export function Kitchen() {
                         {/* Action hint */}
                         {!isLast && (
                           <div
-                            className="text-[10px] font-medium text-center rounded py-0.5 mt-1"
-                            style={{ background: config.bg, color: config.color }}
+                            className="status-hint text-[10px] font-medium text-center rounded py-0.5 mt-1"
+                            style={{ '--hint': config.bg, '--hint-dark': config.darkBg, color: config.color }}
                           >
                             → {ln(KDS_STATUS_CONFIG[KDS_STATUSES[KDS_STATUSES.indexOf(status) + 1]]?.label)}
                           </div>

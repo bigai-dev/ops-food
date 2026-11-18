@@ -9,7 +9,6 @@ import { useChartTheme } from '@/lib/hooks/use-chart-theme'
 import { useI18n } from '@/i18n/I18nContext'
 import { MENU, PAYMENT_METHODS, ORDER_TYPES, menuName } from '@/data'
 
-const PAYMENT_COLORS = ['#3B82F6', '#10B981', '#6366F1', '#22C55E', '#F59E0B', '#EF4444']
 
 export function Dashboard() {
   const { t, ln, locale } = useI18n()
@@ -26,9 +25,9 @@ export function Dashboard() {
   const lowCount = inventory.filter(i => i.stock >= i.min * 0.5 && i.stock < i.min).length
   const critCount = inventory.filter(i => i.stock < i.min * 0.5).length
   const invData = [
-    { name: t('common.sufficient'), value: okCount, color: '#10B981' },
-    { name: t('common.low'), value: lowCount, color: '#F59E0B' },
-    { name: t('common.critical'), value: critCount, color: '#EF4444' },
+    { name: t('common.sufficient'), value: okCount, color: theme.good },
+    { name: t('common.low'), value: lowCount, color: theme.warn },
+    { name: t('common.critical'), value: critCount, color: theme.bad },
   ].filter(d => d.value > 0)
 
   // Payment breakdown from recent orders
@@ -60,17 +59,17 @@ export function Dashboard() {
       {/* KPI Cards — 2 rows × 3 columns */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="stagger-item">
-          <KpiCard title={t('dashboard.revenue')} value={totalRevenue} prefix="RM " color="blue" hero trend={15}
+          <KpiCard title={t('dashboard.revenue')} value={totalRevenue} prefix="RM " color="primary" hero trend={15}
             icon={<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>}
           />
         </div>
         <div className="stagger-item">
-          <KpiCard title={t('dashboard.orders')} value={totalOrders} suffix={` ${t('dashboard.count')}`} color="green"
+          <KpiCard title={t('dashboard.orders')} value={totalOrders} suffix={` ${t('dashboard.count')}`} color="primary"
             icon={<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>}
           />
         </div>
         <div className="stagger-item">
-          <KpiCard title={t('dashboard.avgOrder')} value={avgOrder} prefix="RM " color="amber"
+          <KpiCard title={t('dashboard.avgOrder')} value={avgOrder} prefix="RM " color="primary"
             icon={<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>}
           />
         </div>
@@ -80,7 +79,7 @@ export function Dashboard() {
           />
         </div>
         <div className="stagger-item">
-          <KpiCard title={t('dashboard.sstCollected')} value={Math.round(totalSst)} prefix="RM " color="purple"
+          <KpiCard title={t('dashboard.sstCollected')} value={Math.round(totalSst)} prefix="RM " color="primary"
             icon={<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></svg>}
           />
         </div>
@@ -99,10 +98,10 @@ export function Dashboard() {
               <CartesianGrid strokeDasharray="3 3" stroke={theme.grid} horizontal={false} />
               <XAxis type="number" tick={{ fill: theme.muted, fontSize: 12 }} />
               <YAxis type="category" dataKey="name" width={locale === 'zh' ? 75 : 120} tick={{ fill: theme.label || theme.text, fontSize: locale === 'zh' ? 14 : 12, fontWeight: 700 }} />
-              <Tooltip contentStyle={{ background: theme.bg, color: theme.text, border: `1px solid ${theme.grid}`, borderRadius: 10, fontSize: 13 }} />
+              <Tooltip {...theme.tooltip} />
               <Bar dataKey="count" name={t('reports.portions')} radius={[0, 6, 6, 0]} animationDuration={800}>
                 {topSellers.map((_, i) => (
-                  <Cell key={i} fill={theme.colors[i % theme.colors.length]} />
+                  <Cell key={i} fill={theme.primary} />
                 ))}
               </Bar>
             </BarChart>
@@ -115,10 +114,10 @@ export function Dashboard() {
               <CartesianGrid strokeDasharray="3 3" stroke={theme.grid} vertical={false} />
               <XAxis dataKey="label" tick={{ fill: theme.muted, fontSize: 12 }} />
               <YAxis tick={{ fill: theme.muted, fontSize: 12 }} />
-              <Tooltip contentStyle={{ background: theme.bg, color: theme.text, border: `1px solid ${theme.grid}`, borderRadius: 10, fontSize: 13 }} />
+              <Tooltip {...theme.tooltip} />
               <Bar dataKey="count" name={t('reports.orderCount2')} radius={[6, 6, 0, 0]} animationDuration={800}>
                 {timeSlots.map((slot, i) => (
-                  <Cell key={i} fill={slot.count >= 10 ? theme.primary : theme.colors[1]} />
+                  <Cell key={i} fill={theme.primary} fillOpacity={slot.count >= 10 ? 1 : 0.45} />
                 ))}
               </Bar>
             </BarChart>
@@ -128,10 +127,10 @@ export function Dashboard() {
         <ChartCard title={`📦 ${t('dashboard.inventoryStatus')}`} className="lg:col-span-1 stagger-item">
           <ResponsiveContainer width="100%" height={200}>
             <PieChart>
-              <Pie data={invData} cx="50%" cy="50%" innerRadius={45} outerRadius={70} paddingAngle={4} dataKey="value" animationDuration={800}>
+              <Pie data={invData} stroke={theme.surface} cx="50%" cy="50%" innerRadius={45} outerRadius={70} paddingAngle={4} dataKey="value" animationDuration={800}>
                 {invData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
               </Pie>
-              <Tooltip contentStyle={{ background: theme.bg, color: theme.text, border: `1px solid ${theme.grid}`, borderRadius: 10, fontSize: 13 }} />
+              <Tooltip {...theme.tooltip} />
             </PieChart>
           </ResponsiveContainer>
           <div className="flex flex-col items-center gap-1.5 -mt-1">
@@ -151,16 +150,16 @@ export function Dashboard() {
           <ChartCard title={`💳 ${t('dashboard.paymentBreakdown')}`} className="stagger-item">
             <ResponsiveContainer width="100%" height={180}>
               <PieChart>
-                <Pie data={paymentData} cx="50%" cy="50%" innerRadius={40} outerRadius={65} paddingAngle={4} dataKey="value" animationDuration={800}>
-                  {paymentData.map((_, i) => <Cell key={i} fill={PAYMENT_COLORS[i % PAYMENT_COLORS.length]} />)}
+                <Pie data={paymentData} stroke={theme.surface} cx="50%" cy="50%" innerRadius={40} outerRadius={65} paddingAngle={4} dataKey="value" animationDuration={800}>
+                  {paymentData.map((_, i) => <Cell key={i} fill={theme.colors[i % theme.colors.length]} />)}
                 </Pie>
-                <Tooltip contentStyle={{ background: theme.bg, color: theme.text, border: `1px solid ${theme.grid}`, borderRadius: 10, fontSize: 13 }} />
+                <Tooltip {...theme.tooltip} />
               </PieChart>
             </ResponsiveContainer>
             <div className="flex flex-wrap justify-center gap-2 -mt-1">
               {paymentData.map((d, i) => (
                 <span key={d.name} className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <span className="w-2 h-2 rounded-full" style={{ background: PAYMENT_COLORS[i % PAYMENT_COLORS.length] }} />
+                  <span className="w-2 h-2 rounded-full" style={{ background: theme.colors[i % theme.colors.length] }} />
                   {d.name} ({d.value})
                 </span>
               ))}

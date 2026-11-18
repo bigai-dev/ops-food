@@ -5,7 +5,9 @@
 
 @custom-variant dark (&:is(.dark *));
 
-@theme inline {
+/* Not `inline`: utilities must read these as variables so the dark and
+   FoodOps overrides below actually reach every background, text and border class. */
+@theme {
   --color-background: oklch(0.985 0 0);
   --color-foreground: oklch(0.145 0 0);
   --color-card: oklch(1 0 0);
@@ -123,8 +125,10 @@
    ===================================================== */
 
 [data-theme="foodops"] {
-  --color-primary: oklch(0.546 0.245 262.881);
-  --color-ring: oklch(0.546 0.245 262.881);
+  /* Terracotta: the FoodOps accent (white text on it ≥ 5:1) */
+  --color-primary: oklch(0.55 0.15 45);
+  --color-primary-foreground: oklch(1 0 0);
+  --color-ring: oklch(0.55 0.15 45);
   --color-background: oklch(0.975 0.005 80);
   --color-card: oklch(0.995 0.003 80);
   --color-border: oklch(0.915 0.015 70);
@@ -133,29 +137,47 @@
   --color-accent-foreground: oklch(0.35 0.08 55);
   --demo-gradient: linear-gradient(135deg, oklch(0.975 0.01 80), oklch(0.965 0.015 55));
   --demo-sidebar-bg: oklch(0.22 0.03 55);
-  --demo-sidebar-active: oklch(0.55 0.14 55);
-  --demo-kpi-hero: oklch(0.55 0.14 55);
+  --demo-sidebar-active: oklch(0.55 0.15 45);
+  --demo-kpi-hero: oklch(0.55 0.15 45);
 }
+/* Dark: one warm-charcoal ramp (sidebar < page < card < raised < border),
+   all at hue 60 with low chroma so it reads charcoal, not coffee.
+   The accent lifts to amber so it stays readable as text on dark cards. */
 [data-theme="foodops"].dark, .dark [data-theme="foodops"] {
-  --color-background: oklch(0.16 0.015 55);
-  --color-foreground: oklch(0.95 0 0);
-  --color-card: oklch(0.22 0.02 55);
-  --color-card-foreground: oklch(0.95 0 0);
-  --color-popover: oklch(0.22 0.02 55);
-  --color-popover-foreground: oklch(0.95 0 0);
-  --color-border: oklch(0.28 0.02 55);
-  --color-input: oklch(0.28 0.02 55);
-  --color-muted: oklch(0.26 0.015 55);
-  --color-muted-foreground: oklch(0.65 0 0);
-  --color-accent: oklch(0.26 0.015 55);
-  --color-accent-foreground: oklch(0.95 0 0);
-  --color-secondary: oklch(0.26 0 0);
-  --color-secondary-foreground: oklch(0.95 0 0);
-  --color-destructive: oklch(0.5 0.2 25);
-  --color-destructive-foreground: oklch(0.95 0 0);
-  --demo-sidebar-bg: oklch(0.12 0.02 55);
-  --demo-sidebar-active: oklch(0.45 0.12 55);
+  --color-background: oklch(0.2 0.008 60);
+  --color-foreground: oklch(0.94 0.01 80);
+  --color-card: oklch(0.24 0.009 60);
+  --color-card-foreground: oklch(0.94 0.01 80);
+  --color-popover: oklch(0.28 0.01 60);
+  --color-popover-foreground: oklch(0.94 0.01 80);
+  --color-border: oklch(0.32 0.011 60);
+  --color-input: oklch(0.34 0.011 60);
+  --color-muted: oklch(0.28 0.01 60);
+  --color-muted-foreground: oklch(0.72 0.014 75);
+  --color-accent: oklch(0.3 0.012 60);
+  --color-accent-foreground: oklch(0.94 0.01 80);
+  --color-secondary: oklch(0.28 0.01 60);
+  --color-secondary-foreground: oklch(0.94 0.01 80);
+  --color-primary: oklch(0.74 0.14 62);
+  --color-primary-foreground: oklch(0.2 0.03 55);
+  --color-ring: oklch(0.74 0.14 62);
+  --color-destructive: oklch(0.58 0.19 27);
+  --color-destructive-foreground: oklch(1 0 0);
+  --demo-sidebar-bg: oklch(0.17 0.008 60);
+  --demo-sidebar-active: oklch(0.5 0.13 48);
+  --demo-kpi-hero: oklch(0.5 0.13 48);
 }
+
+/* Menu thumbnails: the pastel from data.js in light mode, a faint tint of it in dark */
+.menu-thumb { background: var(--thumb); }
+.dark .menu-thumb { background: color-mix(in oklab, var(--thumb) 22%, var(--color-muted)); }
+
+/* Kitchen "next step" pill: pastel in light mode, the status's translucent tint in dark */
+.status-hint { background: var(--hint); }
+.dark .status-hint { background: var(--hint-dark); }
+
+/* Headline KPI card: deeper than the accent in dark mode so its white text stays readable */
+[data-theme] .kpi-hero.kpi-hero { background-color: var(--demo-kpi-hero, var(--color-primary)) !important; }
 
 /* =====================================================
    PRECISION STYLING
@@ -713,8 +735,8 @@
    ===================================================== */
 
 .ai-badge {
-  background: linear-gradient(135deg, #6366F1, #8B5CF6) !important;
-  color: white !important;
+  background: var(--color-primary) !important;
+  color: var(--color-primary-foreground) !important;
   font-size: 10px !important;
   font-weight: 700 !important;
   padding: 2px 8px !important;

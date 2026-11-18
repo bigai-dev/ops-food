@@ -62,3 +62,8 @@ playwright/.cache
 # Ad-hoc screenshots & captures
 *.screenshot.png
 screenshots/
+
+# Next.js
+.next
+out
+next-env.d.ts

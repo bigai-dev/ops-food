@@ -142,22 +142,23 @@ function generateForecasts(orders, inventory, salesRanking, timeSlots, totalReve
 // AI Insight Card
 // ==========================================
 function InsightCard({ icon, title, children, severity = 'info' }) {
+  // Neutral card for plain info; a faint tint only when the insight is good news or a warning
   const borderColor = {
-    info: 'rgba(99, 102, 241, 0.3)',
+    info: 'var(--color-border)',
     success: 'rgba(16, 185, 129, 0.3)',
     warning: 'rgba(245, 158, 11, 0.3)',
     danger: 'rgba(239, 68, 68, 0.3)',
   }[severity]
 
   const bgColor = {
-    info: 'rgba(99, 102, 241, 0.04)',
-    success: 'rgba(16, 185, 129, 0.04)',
-    warning: 'rgba(245, 158, 11, 0.04)',
-    danger: 'rgba(239, 68, 68, 0.04)',
+    info: 'var(--color-card)',
+    success: 'rgba(16, 185, 129, 0.06)',
+    warning: 'rgba(245, 158, 11, 0.06)',
+    danger: 'rgba(239, 68, 68, 0.06)',
   }[severity]
 
   return (
-    <div className="ai-insight-card" style={{ borderLeft: `3px solid ${borderColor}`, background: bgColor }}>
+    <div className="ai-insight-card" style={{ border: `1px solid ${borderColor}`, background: bgColor }}>
       <div className="flex items-center gap-2 mb-1.5">
         <span className="text-base">{icon}</span>
         <span className="text-base font-bold" style={{ color: 'var(--color-foreground)' }}>{title}</span>
@@ -240,14 +241,14 @@ export function Reports() {
         <Card className="card-hover stagger-item forecast-kpi-card">
           <CardContent className="p-4">
             <p className="text-sm font-semibold uppercase tracking-wider" style={{ color: 'var(--color-muted-foreground)' }}>{t('reports.forecastProfit')}</p>
-            <p className="text-3xl font-extrabold heading-font tabular-nums mt-1" style={{ color: '#10B981' }}>RM {forecast.forecastProfit.toLocaleString()}</p>
+            <p className="text-3xl font-extrabold heading-font tabular-nums mt-1" style={{ color: theme.good }}>RM {forecast.forecastProfit.toLocaleString()}</p>
             <p className="text-sm mt-1" style={{ color: 'var(--color-muted-foreground)' }}>{t('reports.margin')} {forecast.margin}%</p>
           </CardContent>
         </Card>
         <Card className="card-hover stagger-item forecast-kpi-card">
           <CardContent className="p-4">
             <p className="text-sm font-semibold uppercase tracking-wider" style={{ color: 'var(--color-muted-foreground)' }}>{t('reports.forecastCogs')}</p>
-            <p className="text-3xl font-extrabold heading-font tabular-nums mt-1" style={{ color: '#F59E0B' }}>RM {forecast.forecastCogs.toLocaleString()}</p>
+            <p className="text-3xl font-extrabold heading-font tabular-nums mt-1" style={{ color: theme.warn }}>RM {forecast.forecastCogs.toLocaleString()}</p>
             <p className="text-sm mt-1" style={{ color: 'var(--color-muted-foreground)' }}>{t('reports.ingredientCost')}</p>
           </CardContent>
         </Card>
@@ -272,7 +273,7 @@ export function Reports() {
               <CartesianGrid strokeDasharray="3 3" stroke={theme.grid} vertical={false} />
               <XAxis dataKey="date" tick={{ fill: theme.muted, fontSize: 14 }} />
               <YAxis tick={{ fill: theme.muted, fontSize: 14 }} />
-              <Tooltip contentStyle={{ background: theme.bg, color: theme.text, border: `1px solid ${theme.grid}`, borderRadius: 10, fontSize: 14 }} />
+              <Tooltip {...theme.tooltip} />
               <Area type="monotone" dataKey="actual" name={t('reports.actual')} stroke={theme.primary} fill="url(#actualGrad)" strokeWidth={2} dot={{ r: 3, fill: theme.primary }} connectNulls={false} />
               <Area type="monotone" dataKey="forecast" name={t('reports.forecast')} stroke={theme.colors[1]} fill="url(#forecastGrad)" strokeWidth={2} strokeDasharray="6 3" dot={false} />
             </AreaChart>
@@ -324,12 +325,12 @@ export function Reports() {
               <XAxis dataKey="day" tick={{ fill: theme.muted, fontSize: 14 }} />
               <YAxis tick={{ fill: theme.muted, fontSize: 14 }} />
               <Tooltip
-                contentStyle={{ background: theme.bg, color: theme.text, border: `1px solid ${theme.grid}`, borderRadius: 10, fontSize: 14 }}
+                {...theme.tooltip}
                 formatter={(value, name) => [`RM ${value}`, name]}
               />
               <Bar dataKey="predicted" name={t('reports.forecast')} radius={[6, 6, 0, 0]} animationDuration={800}>
                 {forecast.weeklyForecast.map((d, i) => (
-                  <Cell key={i} fill={d.predicted >= forecast.forecastRevenue / 7 ? theme.primary : theme.colors[1]} />
+                  <Cell key={i} fill={theme.primary} fillOpacity={d.predicted >= forecast.forecastRevenue / 7 ? 1 : 0.45} />
                 ))}
               </Bar>
             </BarChart>
@@ -359,7 +360,7 @@ export function Reports() {
                   <div className="h-1 rounded-full mt-1" style={{ background: 'var(--color-muted)' }}>
                     <div className="h-full rounded-full" style={{
                       width: `${Math.min(100, (item.count / (forecast.menuInsights[0]?.count || 1)) * 100)}%`,
-                      background: item.profitMargin > 60 ? '#10B981' : item.profitMargin > 40 ? '#F59E0B' : '#EF4444',
+                      background: item.profitMargin > 60 ? theme.good : item.profitMargin > 40 ? theme.warn : theme.bad,
                     }} />
                   </div>
                 </div>

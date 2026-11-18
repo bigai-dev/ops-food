@@ -1,15 +1,6 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
 import { SidebarLayout } from '@/components/SidebarLayout'
 import { useFoodOpsStore } from '@/store'
 import { useI18n } from '@/i18n/I18nContext'
-import { Dashboard } from './Dashboard'
-import { Orders } from './Orders'
-import { Kitchen } from './Kitchen'
-import { Tables } from './Tables'
-import { Inventory } from './Inventory'
-import { Schedule } from './Schedule'
-import { Settings } from './Settings'
-import { Reports } from './Reports'
 
 const NAV_ICONS = {
   dashboard: <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>,
@@ -22,7 +13,9 @@ const NAV_ICONS = {
   reports: <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>,
 }
 
-export function FoodOpsLayout() {
+// Sidebar, top bar and alerts shared by every screen.
+// Each screen has its own file under app/ (e.g. app/orders/page.jsx).
+export function FoodOpsLayout({ children }) {
   const { t, ln } = useI18n()
   // Subscribe to the data itself so badges and alerts update as soon as orders or stock change
   const inventory = useFoodOpsStore(s => s.inventory)
@@ -47,29 +40,15 @@ export function FoodOpsLayout() {
   ]
 
   return (
-    <Routes>
-      <Route
-        element={
-          <SidebarLayout
-            navItems={navItems}
-            title="FoodOps"
-            icon="🍜"
-            theme="foodops"
-            notifications={notifications}
-            onResetData={resetAll}
-          />
-        }
-      >
-        <Route index element={<Dashboard />} />
-        <Route path="orders" element={<Orders />} />
-        <Route path="kitchen" element={<Kitchen />} />
-        <Route path="tables" element={<Tables />} />
-        <Route path="inventory" element={<Inventory />} />
-        <Route path="schedule" element={<Schedule />} />
-        <Route path="settings" element={<Settings />} />
-        <Route path="reports" element={<Reports />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Route>
-    </Routes>
+    <SidebarLayout
+      navItems={navItems}
+      title="FoodOps"
+      icon="🍜"
+      theme="foodops"
+      notifications={notifications}
+      onResetData={resetAll}
+    >
+      {children}
+    </SidebarLayout>
   )
 }

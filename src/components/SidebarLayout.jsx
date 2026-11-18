@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { NavLink, Outlet } from 'react-router-dom'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { useI18n } from '@/i18n/I18nContext'
@@ -13,6 +14,10 @@ function MenuIcon() {
 
 function SidebarNav({ navItems, title, icon, onResetData }) {
   const { t } = useI18n()
+  const pathname = usePathname()
+  const isActivePath = (item) =>
+    item.end ? pathname === item.path : pathname === item.path || pathname.startsWith(`${item.path}/`)
+
   return (
     <div className="flex flex-col h-full text-white w-55" style={{ background: 'var(--demo-sidebar-bg, #0F172A)' }}>
       <div style={{ padding: '24px 20px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
@@ -23,32 +28,33 @@ function SidebarNav({ navItems, title, icon, onResetData }) {
       </div>
 
       <nav className="flex-1 py-3 px-3 overflow-y-auto" style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        {navItems.map((item) => (
-          <NavLink
-            key={item.path}
-            to={item.path}
-            end={item.end}
-            className={({ isActive }) =>
-              `nav-item-precise flex items-center text-sm ${
+        {navItems.map((item) => {
+          const isActive = isActivePath(item)
+          return (
+            <Link
+              key={item.path}
+              href={item.path}
+              aria-current={isActive ? 'page' : undefined}
+              className={`nav-item-precise flex items-center text-sm ${
                 isActive
                   ? 'text-white font-semibold'
                   : 'text-slate-300 hover:text-white'
-              }`
-            }
-            style={({ isActive }) => ({
-              gap: 12,
-              background: isActive ? 'var(--demo-sidebar-active, var(--color-primary))' : undefined,
-            })}
-          >
-            <span className="flex items-center justify-center shrink-0" style={{ width: 24, height: 24 }}>{item.icon}</span>
-            <span className="flex-1 truncate">{item.label}</span>
-            {item.badge > 0 && (
-              <span className="flex items-center justify-center text-white font-bold" style={{ background: '#EF4444', borderRadius: 20, minWidth: 18, height: 18, fontSize: 10, padding: '0 5px' }}>
-                {item.badge}
-              </span>
-            )}
-          </NavLink>
-        ))}
+              }`}
+              style={{
+                gap: 12,
+                background: isActive ? 'var(--demo-sidebar-active, var(--color-primary))' : undefined,
+              }}
+            >
+              <span className="flex items-center justify-center shrink-0" style={{ width: 24, height: 24 }}>{item.icon}</span>
+              <span className="flex-1 truncate">{item.label}</span>
+              {item.badge > 0 && (
+                <span className="flex items-center justify-center text-white font-bold" style={{ background: '#EF4444', borderRadius: 20, minWidth: 18, height: 18, fontSize: 10, padding: '0 5px' }}>
+                  {item.badge}
+                </span>
+              )}
+            </Link>
+          )
+        })}
       </nav>
 
       <div className="px-3 py-3 border-t border-white/10 space-y-2">
@@ -75,7 +81,7 @@ function SidebarNav({ navItems, title, icon, onResetData }) {
   )
 }
 
-export function SidebarLayout({ navItems, title, icon, theme, notifications, onResetData }) {
+export function SidebarLayout({ navItems, title, icon, theme, notifications, onResetData, children }) {
   const { t } = useI18n()
   const [mobileOpen, setMobileOpen] = useState(false)
 
@@ -91,7 +97,9 @@ export function SidebarLayout({ navItems, title, icon, theme, notifications, onR
             <MenuIcon />
           </SheetTrigger>
         </div>
-        <SheetContent side="left" className="p-0 w-55">
+        {/* Match the desktop sidebar width (the sheet's default is 3/4 of the screen) */}
+        <SheetContent side="left" className="p-0 w-55 data-[side=left]:w-55 border-r-0">
+
           <SheetTitle className="sr-only">{title} {t('common.navigation')}</SheetTitle>
           <SidebarNav navItems={navItems} title={title} icon={icon} onResetData={onResetData} />
         </SheetContent>
@@ -100,7 +108,7 @@ export function SidebarLayout({ navItems, title, icon, theme, notifications, onR
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <TopBar notifications={notifications} />
         <main className="flex-1 overflow-y-auto p-6">
-          <Outlet />
+          {children}
         </main>
       </div>
     </div>

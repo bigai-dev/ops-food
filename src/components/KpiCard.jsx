@@ -5,7 +5,7 @@ export function KpiCard({ title, value, prefix = '', suffix = '', icon, color = 
   const animatedValue = useCountUp(value)
 
   const colorMap = {
-    primary: { bg: 'bg-primary/10', text: 'text-primary', heroBg: 'bg-primary' },
+    primary: { bg: 'bg-primary/10', text: 'text-primary', heroBg: 'kpi-hero' },
     green: { bg: 'bg-emerald-500/10', text: 'text-emerald-600 dark:text-emerald-400', heroBg: 'bg-emerald-600' },
     amber: { bg: 'bg-amber-500/10', text: 'text-amber-600 dark:text-amber-400', heroBg: 'bg-amber-600' },
     red: { bg: 'bg-red-500/10', text: 'text-red-600 dark:text-red-400', heroBg: 'bg-red-600' },
